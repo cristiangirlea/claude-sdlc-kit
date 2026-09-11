@@ -1,0 +1,9 @@
+{
+  "name": "sdlc",
+  "version": "0.1.0",
+  "description": "Full SDLC workflow for Claude Code: spec -> plan -> implement -> review -> verify -> ship, with specialised subagents, reusable skills, slash commands and safety hooks.",
+  "author": {
+    "name": "Cristian Girlea"
+  },
+  "keywords": ["sdlc", "workflow", "tdd", "code-review", "adr", "release"]
+}

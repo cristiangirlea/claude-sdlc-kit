@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "sdlc-kit",
+  "description": "Opinionated, project-agnostic Claude Code kit for a full software development lifecycle: specs, planning, TDD implementation, review, verification, shipping, and issue-tracker integration.",
+  "owner": {
+    "name": "Cristian Girlea"
+  },
+  "plugins": [
+    {
+      "name": "sdlc",
+      "description": "Full SDLC workflow for Claude Code: agents, skills and slash commands covering spec -> plan -> implement -> review -> verify -> ship, plus ADRs, security review, debugging and releases.",
+      "category": "workflow",
+      "source": "./plugins/sdlc"
+    },
+    {
+      "name": "tracker",
+      "description": "Issue-tracker integration for the SDLC workflow. Ships a zero-dependency local file tracker that works today, and a Jira adapter (REST or Atlassian MCP) behind the same command surface.",
+      "category": "workflow",
+      "source": "./plugins/tracker"
+    }
+  ]
+}

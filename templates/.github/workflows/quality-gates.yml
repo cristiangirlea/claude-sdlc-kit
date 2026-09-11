@@ -1,0 +1,70 @@
+# Example CI workflow: the same gates the SDLC kit runs locally.
+#
+# The point is that `/sdlc:verify` and CI run THE SAME commands. When they
+# drift, CI wins and CLAUDE.md is wrong - fix CLAUDE.md.
+#
+# Replace the language blocks with the ones this project actually uses.
+
+name: quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so reviews can diff against the base
+
+      # --- pick the toolchain(s) this project uses -----------------------
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
+      #     cache: npm
+
+      # --- gates, in the order /sdlc:verify runs them --------------------
+      - name: Build
+        run: make build
+
+      - name: Format check
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+
+      - name: Vet / lint
+        run: make lint
+
+      - name: Tests
+        run: make test
+
+      # --- guardrails worth having in CI --------------------------------
+      - name: No secrets committed
+        run: |
+          if git diff --name-only origin/${{ github.base_ref || 'main' }}...HEAD \
+             | grep -E '(^|/)\.env$|\.pem$|id_rsa' ; then
+            echo "A file that should never be committed is in this diff."
+            exit 1
+          fi
+
+      - name: Migrations are reversible
+        run: |
+          # Every `up` migration needs a matching `down`.
+          for f in migrations/*up*.sql; do
+            [ -e "$f" ] || continue
+            d="${f/up/down}"
+            [ -f "$d" ] || { echo "missing down migration for $f"; exit 1; }
+          done
