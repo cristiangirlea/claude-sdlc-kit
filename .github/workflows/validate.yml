@@ -1,0 +1,30 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Frontmatter, manifest coverage, adapter structure, and - last - that
+      # adapters/ is in sync with src/. A stale adapter is the failure mode
+      # this layout introduces, so it is a hard failure here.
+      - name: Validate kit
+        run: node scripts/validate-kit.mjs
+
+      - name: Installer syntax
+        run: bash -n scripts/install.sh
+
+      - name: Hooks are syntactically valid
+        run: for f in src/hooks/*.mjs src/scripts/*.mjs scripts/*.mjs; do node --check "$f"; done

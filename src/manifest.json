@@ -1,0 +1,63 @@
+{
+  "$comment": "Single source of truth for what goes into each plugin. scripts/build.mjs renders adapters/<tool>/ from src/ using this. Never edit adapters/ by hand.",
+  "version": "0.2.0",
+  "marketplace": {
+    "name": "sdlc-kit",
+    "displayName": "SDLC Kit",
+    "description": "Opinionated, project-agnostic kit for a full software development lifecycle: specs, planning, TDD implementation, review, verification, shipping, and issue-tracker integration.",
+    "owner": { "name": "Cristian Girlea" }
+  },
+  "plugins": [
+    {
+      "name": "sdlc",
+      "displayName": "SDLC Workflow",
+      "category": "workflow",
+      "description": "Full SDLC workflow: spec -> plan -> implement -> review -> verify -> ship, with specialised roles, reusable skills, procedures and safety guardrails.",
+      "keywords": ["sdlc", "workflow", "tdd", "code-review", "adr", "release"],
+      "readme": "plugin-readme-sdlc.md",
+      "skills": [
+        "sdlc-workflow",
+        "spec-writing",
+        "task-decomposition",
+        "tdd-workflow",
+        "testing-strategy",
+        "code-review-standards",
+        "git-workflow",
+        "adr-writing",
+        "secure-coding",
+        "definition-of-done",
+        "incident-response",
+        "repo-onboarding",
+        "release-management"
+      ],
+      "agents": [
+        "spec-analyst",
+        "codebase-explorer",
+        "solution-architect",
+        "test-author",
+        "task-implementer",
+        "code-reviewer",
+        "security-auditor",
+        "debugger",
+        "qa-verifier",
+        "docs-scribe",
+        "release-manager"
+      ],
+      "commands": "sdlc",
+      "hooks": true
+    },
+    {
+      "name": "tracker",
+      "displayName": "Issue Tracker",
+      "category": "workflow",
+      "description": "Tracker-agnostic issue workflow. A zero-dependency local file backend works out of the box; a Jira adapter (REST or MCP) drops in behind the same procedures.",
+      "keywords": ["jira", "issues", "tracker", "sdlc"],
+      "readme": "plugin-readme-tracker.md",
+      "skills": ["tracker-workflow", "jira-integration"],
+      "agents": [],
+      "commands": "tracker",
+      "scripts": ["tracker.mjs"],
+      "hooks": false
+    }
+  ]
+}

@@ -4,6 +4,35 @@ All notable changes to this kit are recorded here, in [Keep a Changelog](https:/
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-11
+
+Restructured so one copy of the content ships to more than one agent.
+
+### Added
+
+- **Codex adapter.** The same skills, procedures and roles rendered for Codex: skills keep the identical `SKILL.md` contract, procedures become `<plugin>-<name>` skills (Codex has no slash commands), and roles become `references/agents/*.md` to run as a separate `codex exec` pass (Codex has no subagent dispatch).
+- **`templates/git-hooks/pre-commit`** - refuses commits carrying `.env` files, private keys, credential files, high-confidence credential patterns, or conflict markers. Tool-agnostic by design: it binds humans and every agent, which is the right home for a rule this absolute. Exercised against eight commit scenarios.
+- **`scripts/build.mjs`** - renders `adapters/<tool>/` from `src/`, with `--check` to fail when they have drifted.
+- **`AGENTS.md`** as the project-memory template, with `CLAUDE.md` reduced to a one-line pointer at it - one file of memory, read by every tool.
+- **CI** (`.github/workflows/validate.yml`) running the validator, installer syntax and hook syntax.
+- **`src/manifest.json`** - declares which skills, roles, procedures and scripts ship in which plugin. Content claimed by no plugin is now an error rather than a silent omission.
+
+### Changed
+
+- **Layout.** `src/` is the single source of truth; `plugins/` is gone. `adapters/claude/` and `adapters/codex/` are generated and committed so installing still needs no build step.
+- **Tool-specific text is now tokens** (`{{CMD:...}}`, `{{AGENT:...}}`, `{{MEMORY}}`, `{{ARGS}}`, `{{PLUGIN_ROOT}}`, `{{SETTINGS}}`, `{{TOOL}}`) plus `<!-- if:claude -->` / `<!-- if:codex -->` blocks, so the two adapters cannot drift into contradicting each other.
+- **`validate-kit.mjs`** now checks the source, manifest coverage, both generated adapters, unknown tokens, unbalanced conditionals, and finally that the adapters match `src/`.
+- **Installers** take `--tool claude|codex`, and seed `AGENTS.md`, the `CLAUDE.md` pointer and the git hook.
+
+### Fixed
+
+- The pre-commit guard's private-key pattern begins with a dash and was being parsed by `grep` as an option; it now passes patterns with `-e`.
+
+### Known limitations
+
+- The Codex adapter's format was derived from an installed Codex build's on-disk plugin layout, not from documentation, and has not been loaded by a live Codex install.
+- The Jira backend still has not been run against a live instance.
+
 ## [0.1.0] - 2026-08-28
 
 First working version.

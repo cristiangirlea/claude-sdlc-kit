@@ -4,8 +4,10 @@ Files to copy into a target project. `scripts/install.sh --templates` (or `insta
 
 | File | Goes to | Notes |
 | --- | --- | --- |
-| `CLAUDE.md` | repo root | Project memory, loaded into every session. Prefer generating it with `/sdlc:onboard`, which verifies every command it writes down |
-| `settings.json` | `.claude/settings.json` | Permissions and hook wiring. Commit it - the whole team gets the same behaviour |
+| `AGENTS.md` | repo root | Project memory, loaded into every session. Prefer generating it with the onboard procedure, which verifies every command it writes down |
+| `CLAUDE.md` | repo root | One-line pointer at `AGENTS.md`, so Claude Code and Codex read the same file |
+| `git-hooks/pre-commit` | `.githooks/pre-commit` | Refuses commits carrying secrets, keys or conflict markers. Enable with `git config core.hooksPath .githooks` |
+| `settings.json` | `.claude/settings.json` | Permissions and hook wiring (Claude Code). Commit it - the whole team gets the same behaviour |
 | `.github/pull_request_template.md` | `.github/` | The Verification section is the one that matters |
 | `.github/workflows/quality-gates.yml` | `.github/workflows/` | Example CI running the same gates as `/sdlc:verify` |
 | `docs/specs/README.md` | `docs/specs/` | What belongs in a spec |
@@ -26,9 +28,9 @@ JSON has no comments, so the notes live here.
 
 Personal, uncommitted overrides belong in `.claude/settings.local.json` (add it to `.gitignore`).
 
-## About `CLAUDE.md`
+## About `AGENTS.md`
 
-It loads into every session, so it is expensive context. Four rules keep it worth its cost:
+It loads into every session on every tool, so it is expensive context. Four rules keep it worth its cost:
 
 1. Every command in it must have been **run** and observed to work.
 2. Say only what the code does not already say.

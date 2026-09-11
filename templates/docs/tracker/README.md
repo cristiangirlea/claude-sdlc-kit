@@ -15,14 +15,15 @@ These are plain files on purpose. They diff, they get reviewed alongside the cod
 
 ## Commands
 
-`/tracker:pick`, `/tracker:start <id>`, `/tracker:sync`, `/tracker:comment <id> <text>`, `/tracker:report`.
+Claude Code: `/tracker:pick`, `/tracker:start <id>`, `/tracker:sync`, `/tracker:comment <id> <text>`, `/tracker:report`.
+Codex: the `tracker-pick`, `tracker-start`, `tracker-sync`, `tracker-comment` and `tracker-report` skills.
 
 Directly:
 
 ```bash
-node <kit>/plugins/tracker/scripts/tracker.mjs list --status ready
-node <kit>/plugins/tracker/scripts/tracker.mjs new "<title>" --type feature --priority P2
-node <kit>/plugins/tracker/scripts/tracker.mjs move <ID> in-progress
+node <tracker-plugin-root>/scripts/tracker.mjs list --status ready
+node <tracker-plugin-root>/scripts/tracker.mjs new "<title>" --type feature --priority P2
+node <tracker-plugin-root>/scripts/tracker.mjs move <ID> in-progress
 ```
 
 Configuration lives in `.sdlc/tracker.json`. Switching this project to Jira changes that file and nothing else about how the work is done.
