@@ -7,7 +7,7 @@ Two installation routes, then a staged rollout. Do not turn everything on at onc
 The kit stays in its own repo; projects reference it. Updates arrive by updating the plugin.
 
 ```
-/plugin marketplace add <owner>/claude-sdlc-kit
+/plugin marketplace add cristiangirlea/claude-sdlc-kit
 /plugin install sdlc@sdlc-kit
 /plugin install tracker@sdlc-kit
 ```

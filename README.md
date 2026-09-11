@@ -19,7 +19,7 @@ Three rules run through everything here:
 **As a plugin** (one canonical copy, updates without a per-repo pull):
 
 ```
-/plugin marketplace add <owner>/claude-sdlc-kit
+/plugin marketplace add cristiangirlea/claude-sdlc-kit
 /plugin install sdlc@sdlc-kit
 /plugin install tracker@sdlc-kit
 ```
