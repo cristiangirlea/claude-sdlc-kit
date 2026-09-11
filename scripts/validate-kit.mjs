@@ -1,232 +1,235 @@
 #!/usr/bin/env node
-// Structural validator for this kit.
+// Structural validator for the kit.
 //
-// Catches the mistakes that make a plugin silently not load: malformed
-// frontmatter, a skill whose `name` disagrees with its directory, a hook
-// pointing at a script that does not exist, unparseable JSON manifests.
+// Checks the SOURCE (src/) for the mistakes that make a plugin silently not
+// load, checks the manifest actually claims every source file, checks the
+// generated adapters are well formed, and finally that they are in sync with
+// src/ - a stale adapter is the failure mode this layout introduces, so it is
+// the one the validator mainly exists to catch.
 //
-// Run from the repo root:  node scripts/validate-kit.mjs
-// Exit code 0 = clean, 1 = errors found. Warnings do not fail the run.
+//   node scripts/validate-kit.mjs
+//
+// Exit 0 = clean, 1 = errors. Warnings never fail the run.
 
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 
-const ROOT = resolve(process.argv[2] ?? ".");
+const ROOT = resolve(dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+const SRC = join(ROOT, "src");
+
 const errors = [];
 const warnings = [];
-const counts = { plugins: 0, agents: 0, skills: 0, commands: 0, hooks: 0 };
-
 const err = (file, msg) => errors.push(`${file}: ${msg}`);
 const warn = (file, msg) => warnings.push(`${file}: ${msg}`);
+const counts = { skills: 0, agents: 0, commands: 0, hooks: 0, adapters: 0 };
 
-const rel = (p) => p.slice(ROOT.length + 1).replace(/\\/g, "/");
+const DESC_MAX = 1024;
+const KNOWN_TOKENS = /^\{\{(CMD:[a-z]+:[a-z-]+|AGENT:[a-z-]+|MEMORY|ARGS|PLUGIN_ROOT|SETTINGS|TOOL)\}\}$/;
 
-function readJson(path) {
+function readJson(relPath) {
   try {
-    return JSON.parse(readFileSync(path, "utf8"));
+    return JSON.parse(readFileSync(join(ROOT, relPath), "utf8"));
   } catch (e) {
-    err(rel(path), `invalid JSON - ${e.message}`);
+    err(relPath, `invalid or missing JSON - ${e.message}`);
     return null;
   }
 }
 
-// Minimal frontmatter reader: `key: value` pairs, tolerant of block scalars.
 function frontmatter(path) {
   const raw = readFileSync(path, "utf8");
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---(\r?\n|$)/);
   if (!m) return null;
   const meta = {};
-  let currentKey = null;
+  let key = null;
   for (const line of m[1].split(/\r?\n/)) {
     const kv = line.match(/^([A-Za-z0-9_-]+):\s?(.*)$/);
-    if (kv) {
-      currentKey = kv[1];
-      meta[currentKey] = kv[2].trim();
-    } else if (currentKey && /^\s+\S/.test(line)) {
-      meta[currentKey] = `${meta[currentKey]} ${line.trim()}`.trim();
-    }
+    if (kv) { key = kv[1]; meta[key] = kv[2].trim(); }
+    else if (key && /^\s+\S/.test(line)) meta[key] = `${meta[key]} ${line.trim()}`.trim();
   }
   return meta;
 }
 
-function listFiles(dir, ext) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(ext))
-    .map((f) => join(dir, f));
+const listDirs = (d) => (existsSync(d) ? readdirSync(d).map((f) => join(d, f)).filter((p) => statSync(p).isDirectory()) : []);
+const listFiles = (d, ext) => (existsSync(d) ? readdirSync(d).filter((f) => f.endsWith(ext)).map((f) => join(d, f)) : []);
+const rel = (p) => p.slice(ROOT.length + 1).replace(/\\/g, "/");
+
+function checkBody(path) {
+  const body = readFileSync(path, "utf8");
+
+  for (const m of body.matchAll(/\{\{[^}\n]*\}\}/g)) {
+    if (!KNOWN_TOKENS.test(m[0])) err(rel(path), `unknown build token ${m[0]}`);
+  }
+
+  const opens = [...body.matchAll(/<!--\s*if:([a-z]+)\s*-->/g)];
+  const closes = [...body.matchAll(/<!--\s*endif\s*-->/g)];
+  if (opens.length !== closes.length) {
+    err(rel(path), `unbalanced conditional blocks: ${opens.length} if, ${closes.length} endif`);
+  }
+  for (const o of opens) {
+    if (!["claude", "codex"].includes(o[1])) err(rel(path), `unknown adapter "${o[1]}" in conditional block`);
+  }
+  return body;
 }
 
-function listDirs(dir) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .map((f) => join(dir, f))
-    .filter((p) => statSync(p).isDirectory());
-}
-
-const DESC_MAX = 1024;
-
-function checkNamed(path, kind, expectedName) {
+function checkNamed(path, kind, expected) {
   const meta = frontmatter(path);
-  if (!meta) {
-    err(rel(path), `${kind} has no YAML frontmatter block`);
-    return null;
-  }
-  if (!meta.name) err(rel(path), `${kind} frontmatter is missing \`name\``);
-  else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(meta.name))
-    err(rel(path), `name "${meta.name}" must be lowercase kebab-case`);
-  else if (expectedName && meta.name !== expectedName)
-    err(rel(path), `name "${meta.name}" does not match "${expectedName}"`);
+  if (!meta) { err(rel(path), `${kind} has no YAML frontmatter block`); return null; }
+  if (!meta.name) err(rel(path), `${kind} is missing \`name\``);
+  else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(meta.name)) err(rel(path), `name "${meta.name}" must be lowercase kebab-case`);
+  else if (expected && meta.name !== expected) err(rel(path), `name "${meta.name}" does not match "${expected}"`);
 
-  if (!meta.description) err(rel(path), `${kind} frontmatter is missing \`description\``);
+  if (!meta.description) err(rel(path), `${kind} is missing \`description\``);
   else {
-    if (meta.description.length > DESC_MAX)
-      err(rel(path), `description is ${meta.description.length} chars (max ${DESC_MAX})`);
-    if (meta.description.length < 40)
-      warn(rel(path), "description is very short - it is what triggers the skill/agent, so say when to use it");
+    if (meta.description.length > DESC_MAX) err(rel(path), `description is ${meta.description.length} chars (max ${DESC_MAX})`);
+    if (meta.description.length < 40) warn(rel(path), "description is very short - it is the trigger, so say when to use it");
   }
   return meta;
 }
 
-// --- manifests --------------------------------------------------------------
+// --- source -----------------------------------------------------------------
 
-const marketplacePath = join(ROOT, ".claude-plugin", "marketplace.json");
-let marketplace = null;
-if (!existsSync(marketplacePath)) {
-  err(".claude-plugin/marketplace.json", "missing");
-} else {
-  marketplace = readJson(marketplacePath);
-  if (marketplace) {
-    if (!marketplace.name) err(rel(marketplacePath), "missing `name`");
-    if (!Array.isArray(marketplace.plugins) || !marketplace.plugins.length)
-      err(rel(marketplacePath), "`plugins` must be a non-empty array");
+const manifest = readJson("src/manifest.json");
+
+const srcSkills = listDirs(join(SRC, "skills")).map((d) => basename(d));
+for (const name of srcSkills) {
+  const dir = join(SRC, "skills", name);
+  const file = join(dir, "SKILL.md");
+  if (!existsSync(file)) { err(rel(dir), "skill directory has no SKILL.md"); continue; }
+  counts.skills++;
+  checkNamed(file, "skill", name);
+  const body = checkBody(file);
+  const refs = [...body.matchAll(/`(references\/[A-Za-z0-9._/-]+)`/g), ...body.matchAll(/\]\((references\/[A-Za-z0-9._/-]+)\)/g)];
+  for (const m of refs) {
+    if (!existsSync(join(dir, m[1]))) err(rel(file), `references missing file ${m[1]}`);
   }
 }
 
-const pluginDirs = listDirs(join(ROOT, "plugins"));
-if (!pluginDirs.length) err("plugins/", "no plugin directories found");
-
-// Every plugin listed in the marketplace must exist, and vice versa.
-if (marketplace?.plugins) {
-  for (const p of marketplace.plugins) {
-    const src = typeof p.source === "string" ? p.source : p.source?.path;
-    if (!src) {
-      warn(rel(marketplacePath), `plugin "${p.name}" has a non-local source; not checked`);
-      continue;
+const KNOWN_TOOLS = new Set(["Read", "Write", "Edit", "MultiEdit", "NotebookEdit", "Bash", "Glob", "Grep", "Task", "TodoWrite", "WebFetch", "WebSearch"]);
+const srcAgents = listFiles(join(SRC, "agents"), ".md").map((f) => basename(f, ".md"));
+for (const name of srcAgents) {
+  const file = join(SRC, "agents", `${name}.md`);
+  counts.agents++;
+  const meta = checkNamed(file, "agent", name);
+  checkBody(file);
+  if (meta?.tools) {
+    for (const t of meta.tools.split(/[,\s]+/).filter(Boolean)) {
+      if (!KNOWN_TOOLS.has(t)) warn(rel(file), `unrecognised tool "${t}"`);
     }
-    if (!existsSync(join(ROOT, src)))
-      err(rel(marketplacePath), `plugin "${p.name}" points at ${src}, which does not exist`);
   }
-  const listed = new Set(marketplace.plugins.map((p) => p.name));
-  for (const d of pluginDirs) {
-    if (!listed.has(basename(d)))
-      warn("plugins/", `${basename(d)} is not listed in marketplace.json`);
+  if (meta?.model && !["inherit", "opus", "sonnet", "haiku"].includes(meta.model)) {
+    warn(rel(file), `unusual model "${meta.model}"`);
   }
 }
 
-// --- per plugin -------------------------------------------------------------
+for (const group of listDirs(join(SRC, "commands"))) {
+  for (const file of listFiles(group, ".md")) {
+    counts.commands++;
+    const meta = frontmatter(file);
+    if (!meta) { err(rel(file), "command has no YAML frontmatter block"); continue; }
+    if (!meta.description) err(rel(file), "command is missing `description`");
+    checkBody(file);
+  }
+}
 
-for (const pluginDir of pluginDirs) {
-  const pluginName = basename(pluginDir);
-  counts.plugins += 1;
+for (const file of listFiles(join(SRC, "hooks"), ".mjs")) {
+  counts.hooks++;
+  if (!/process\.exit\(0\)/.test(readFileSync(file, "utf8"))) {
+    warn(rel(file), "hook does not exit 0 unconditionally - a hook bug must never block work");
+  }
+}
 
-  const manifestPath = join(pluginDir, ".claude-plugin", "plugin.json");
-  if (!existsSync(manifestPath)) {
-    err(`plugins/${pluginName}`, "missing .claude-plugin/plugin.json");
-  } else {
-    const manifest = readJson(manifestPath);
-    if (manifest) {
-      if (manifest.name !== pluginName)
-        err(rel(manifestPath), `name "${manifest.name}" does not match directory "${pluginName}"`);
-      if (!manifest.description) err(rel(manifestPath), "missing `description`");
+// --- manifest coverage ------------------------------------------------------
+
+if (manifest) {
+  const claimedSkills = new Set();
+  const claimedAgents = new Set();
+  for (const p of manifest.plugins ?? []) {
+    for (const s of p.skills ?? []) {
+      if (!srcSkills.includes(s)) err("src/manifest.json", `plugin "${p.name}" claims skill "${s}", which is not in src/skills/`);
+      if (claimedSkills.has(s)) err("src/manifest.json", `skill "${s}" is claimed by more than one plugin`);
+      claimedSkills.add(s);
+    }
+    for (const a of p.agents ?? []) {
+      if (!srcAgents.includes(a)) err("src/manifest.json", `plugin "${p.name}" claims agent "${a}", which is not in src/agents/`);
+      claimedAgents.add(a);
+    }
+    if (p.commands && !existsSync(join(SRC, "commands", p.commands))) {
+      err("src/manifest.json", `plugin "${p.name}" points at commands/${p.commands}, which does not exist`);
+    }
+    for (const s of p.scripts ?? []) {
+      if (!existsSync(join(SRC, "scripts", s))) err("src/manifest.json", `plugin "${p.name}" claims script "${s}", which does not exist`);
+    }
+    if (p.readme && !existsSync(join(SRC, p.readme))) {
+      err("src/manifest.json", `plugin "${p.name}" readme "${p.readme}" does not exist`);
     }
   }
-
-  // agents
-  for (const f of listFiles(join(pluginDir, "agents"), ".md")) {
-    counts.agents += 1;
-    const meta = checkNamed(f, "agent", basename(f, ".md"));
-    if (meta && meta.tools) {
-      const known = new Set([
-        "Read", "Write", "Edit", "MultiEdit", "NotebookEdit", "Bash", "Glob",
-        "Grep", "Task", "TodoWrite", "WebFetch", "WebSearch", "Artifact",
-      ]);
-      for (const t of meta.tools.split(/[,\s]+/).filter(Boolean)) {
-        if (!known.has(t)) warn(rel(f), `unrecognised tool "${t}" in \`tools\``);
-      }
-    }
-    if (meta && meta.model && !["inherit", "opus", "sonnet", "haiku"].includes(meta.model))
-      warn(rel(f), `unusual model "${meta.model}"`);
+  for (const s of srcSkills) {
+    if (!claimedSkills.has(s)) err("src/manifest.json", `skill "${s}" is claimed by no plugin - it would ship nowhere`);
   }
-
-  // skills
-  for (const dir of listDirs(join(pluginDir, "skills"))) {
-    const skillFile = join(dir, "SKILL.md");
-    if (!existsSync(skillFile)) {
-      err(rel(dir), "skill directory has no SKILL.md");
-      continue;
-    }
-    counts.skills += 1;
-    checkNamed(skillFile, "skill", basename(dir));
-
-    // Referenced files must exist.
-    const body = readFileSync(skillFile, "utf8");
-    for (const m of body.matchAll(/`(references\/[A-Za-z0-9._/-]+)`/g)) {
-      if (!existsSync(join(dir, m[1]))) err(rel(skillFile), `references missing file ${m[1]}`);
-    }
-    for (const m of body.matchAll(/\]\((references\/[A-Za-z0-9._/-]+)\)/g)) {
-      if (!existsSync(join(dir, m[1]))) err(rel(skillFile), `links to missing file ${m[1]}`);
-    }
+  for (const a of srcAgents) {
+    if (!claimedAgents.has(a)) warn("src/manifest.json", `agent "${a}" is claimed by no plugin`);
   }
+}
 
-  // commands
-  for (const f of listFiles(join(pluginDir, "commands"), ".md")) {
-    counts.commands += 1;
-    const meta = frontmatter(f);
-    if (!meta) {
-      err(rel(f), "command has no YAML frontmatter block");
-      continue;
-    }
-    if (!meta.description) err(rel(f), "command frontmatter is missing `description`");
-    if (meta["allowed-tools"] && !/^\[|^[A-Za-z]/.test(meta["allowed-tools"]))
-      warn(rel(f), "`allowed-tools` should be a JSON array or a comma-separated list");
-  }
+// --- generated adapters -----------------------------------------------------
 
-  // hooks
-  const hooksPath = join(pluginDir, "hooks", "hooks.json");
-  if (existsSync(hooksPath)) {
-    const hooks = readJson(hooksPath);
-    if (hooks) {
-      if (!hooks.hooks || typeof hooks.hooks !== "object")
-        err(rel(hooksPath), "expected a top-level `hooks` object");
-      const text = JSON.stringify(hooks);
-      for (const m of text.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/([A-Za-z0-9._/-]+)/g)) {
-        if (!existsSync(join(pluginDir, m[1])))
-          err(rel(hooksPath), `hook command points at missing file ${m[1]}`);
+const ADAPTERS = [
+  { name: "claude", manifestDir: ".claude-plugin", marketplace: ".claude-plugin/marketplace.json" },
+  { name: "codex", manifestDir: ".codex-plugin", marketplace: ".agents/plugins/marketplace.json" },
+];
+
+for (const a of ADAPTERS) {
+  const dir = join(ROOT, "adapters", a.name);
+  if (!existsSync(dir)) { err(`adapters/${a.name}`, "missing - run: node scripts/build.mjs"); continue; }
+  counts.adapters++;
+
+  const market = readJson(a.marketplace);
+  if (market) {
+    if (!(market.plugins ?? []).length) err(a.marketplace, "no plugins listed");
+    for (const p of market.plugins ?? []) {
+      const path = typeof p.source === "string" ? p.source : p.source?.path;
+      if (!path || !existsSync(join(ROOT, path))) {
+        err(a.marketplace, `plugin "${p.name}" points at ${path}, which does not exist`);
       }
     }
   }
+
+  for (const pluginDir of listDirs(dir)) {
+    const name = basename(pluginDir);
+    const mf = join(pluginDir, a.manifestDir, "plugin.json");
+    if (!existsSync(mf)) { err(rel(pluginDir), `missing ${a.manifestDir}/plugin.json`); continue; }
+    const parsed = readJson(rel(mf));
+    if (parsed && parsed.name !== name) err(rel(mf), `name "${parsed.name}" does not match directory "${name}"`);
+
+    for (const skillDir of listDirs(join(pluginDir, "skills"))) {
+      const f = join(skillDir, "SKILL.md");
+      if (!existsSync(f)) { err(rel(skillDir), "skill directory has no SKILL.md"); continue; }
+      checkNamed(f, "skill", basename(skillDir));
+      for (const m of readFileSync(f, "utf8").matchAll(/\{\{[^}\n]*\}\}/g)) {
+        err(rel(f), `unrendered build token ${m[0]} in generated output`);
+      }
+    }
+  }
 }
 
-// --- hook scripts parse -----------------------------------------------------
+// --- adapters in sync with src ----------------------------------------------
 
-for (const pluginDir of pluginDirs) {
-  for (const f of listFiles(join(pluginDir, "hooks"), ".mjs")) {
-    counts.hooks += 1;
-    const src = readFileSync(f, "utf8");
-    if (!/process\.exit\(0\)/.test(src))
-      warn(rel(f), "hook does not appear to exit 0 unconditionally - a hook bug should never block work");
-  }
+try {
+  execFileSync(process.execPath, [join(ROOT, "scripts", "build.mjs"), "--check"], { cwd: ROOT, stdio: "pipe" });
+} catch (e) {
+  const out = `${e.stdout ?? ""}${e.stderr ?? ""}`.toString().trim();
+  err("adapters/", `out of date with src/ - run: node scripts/build.mjs\n${out}`);
 }
 
 // --- report -----------------------------------------------------------------
 
-const label = rel(ROOT) || basename(ROOT);
 for (const w of warnings) process.stdout.write(`warn  ${w}\n`);
 for (const e of errors) process.stdout.write(`ERROR ${e}\n`);
 
 process.stdout.write(
-  `\nChecked ${counts.plugins} plugin(s): ${counts.agents} agents, ${counts.skills} skills, ` +
-    `${counts.commands} commands, ${counts.hooks} hook scripts\n` +
-    `${errors.length ? "FAIL" : "OK"}  ${label}: ${errors.length} error(s), ${warnings.length} warning(s)\n`
+  `\nSource: ${counts.skills} skills, ${counts.agents} agents, ${counts.commands} commands, ` +
+  `${counts.hooks} hook scripts -> ${counts.adapters} adapter(s)\n` +
+  `${errors.length ? "FAIL" : "OK"}  ${errors.length} error(s), ${warnings.length} warning(s)\n`
 );
 process.exit(errors.length ? 1 : 0);

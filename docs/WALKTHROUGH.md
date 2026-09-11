@@ -2,6 +2,8 @@
 
 One worked example of the whole loop, so the commands stop being abstract. The feature: **users can save a search and re-run it**.
 
+Commands are written in Claude Code form (`/sdlc:spec`). On Codex the same procedures are skills with the same names minus the slash (`sdlc-spec`) - ask for the step and it fires.
+
 Nothing here is magic - each step is a command, an agent, and a gate you can decide to skip. What you cannot skip is the gate's *question*.
 
 ---
@@ -123,7 +125,7 @@ Item moves to `in-review`, PR linked.
 
 The review caught an authorization bug that came from a pattern used in three other handlers. That is not a one-off:
 
-- A line in `CLAUDE.md`: *"Ownership is always derived from the session, never from a request field."*
+- A line in `AGENTS.md`: *"Ownership is always derived from the session, never from a request field."*
 - A checklist item already exists in `code-review-standards` - now it is also in the repo's own memory.
 - A tracker item to fix the other three handlers.
 

@@ -1,9 +1,0 @@
-{
-  "name": "tracker",
-  "version": "0.1.0",
-  "description": "Tracker-agnostic issue workflow for Claude Code. Local file backend works out of the box; Jira backend (REST or Atlassian MCP) drops in behind the same commands.",
-  "author": {
-    "name": "Cristian Girlea"
-  },
-  "keywords": ["jira", "issues", "tracker", "sdlc"]
-}

@@ -1,12 +1,12 @@
 # claude-sdlc-kit
 
-A reusable, project-agnostic Claude Code kit for running a real software development lifecycle: **spec -> plan -> implement -> review -> verify -> ship -> learn**, with a gate between every stage and an issue tracker that works today with no service to sign up for.
+A reusable, project-agnostic kit for running a real software development lifecycle with a coding agent: **spec -> plan -> implement -> review -> verify -> ship -> learn**, with a gate between every stage and an issue tracker that works today with no service to sign up for.
 
-Two plugins, 11 agents, 15 skills, 16 commands, 3 safety hooks. No dependencies beyond Node.js 18+ (and only the hooks and the local tracker need that).
+Written once in `src/`, shipped to **Claude Code** and **Codex** as generated adapters. 15 skills, 11 roles, 16 procedures, guardrails at both the session and the git layer. No dependencies beyond Node.js 18+.
 
 ## Why
 
-Ad-hoc AI-assisted development produces plausible code fast, and then loses the things that make software maintainable: what "done" meant, why a decision was made, whether a test ever failed, what a change could break. This kit encodes those as artefacts and gates, so they survive the session that produced them.
+Ad-hoc AI-assisted development produces plausible code fast, then loses the things that make software maintainable: what "done" meant, why a decision was made, whether a test ever failed, what a change could break. This kit encodes those as artefacts and gates that outlive the session that produced them.
 
 Three rules run through everything here:
 
@@ -16,95 +16,109 @@ Three rules run through everything here:
 
 ## Quick start
 
-**As a plugin** (one canonical copy, updates without a per-repo pull):
+### Claude Code
 
 ```
 /plugin marketplace add cristiangirlea/claude-sdlc-kit
+```
+
+```
 /plugin install sdlc@sdlc-kit
+```
+
+```
 /plugin install tracker@sdlc-kit
 ```
 
-**Vendored into a project** (files committed to the repo, editable in place):
+Then `/sdlc:onboard` to ground it in the project, and `/tracker:setup local`.
+
+### Codex
+
+Add this repo as a marketplace and install the same two plugins, or vendor the files:
 
 ```bash
-./scripts/install.sh /path/to/repo --templates
+./scripts/install.sh /path/to/repo --tool codex --templates
+```
+
+Then ask for the `sdlc-onboard` skill, and `tracker-setup`.
+
+### Vendored (either tool)
+
+```bash
+./scripts/install.sh /path/to/repo --tool claude --templates
 ```
 
 ```powershell
-.\scripts\install.ps1 -Target C:\src\my-repo -Templates
+.\scripts\install.ps1 -Target C:\src\my-repo -Tool claude -Templates
 ```
 
-Then, in the target repo:
-
-```
-/sdlc:onboard          # writes a CLAUDE.md whose commands it actually ran
-/tracker:setup local   # work items as files, no service needed
-```
+Files land in the target repo and are committed there, so the team gets them with a pull. `--dry-run` previews; existing files are skipped unless `--force`.
 
 Full instructions and a staged team rollout: [docs/ADOPTION.md](docs/ADOPTION.md).
-A worked example of one feature going through the whole loop: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
+A worked example of one feature going through the loop: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 ## The loop
 
-| Stage | Command | Owner | Gate before moving on |
+| Stage | Claude Code | Codex | Gate before moving on |
 | --- | --- | --- | --- |
-| Intake | `/tracker:pick` | - | The work has an id |
-| Spec | `/sdlc:spec` | `spec-analyst` | Acceptance criteria are testable; non-goals written |
-| Plan | `/sdlc:plan` | `solution-architect` | Every criterion maps to a slice; every task names its verification |
-| Implement | `/sdlc:implement` | `test-author`, `task-implementer` | Test observed failing first; repo green |
-| Review | `/sdlc:review` | `code-reviewer`, `security-auditor` | No unaddressed blockers or majors |
-| Verify | `/sdlc:verify` | `qa-verifier` | Definition of done passes |
-| Ship | `/sdlc:ship` | `docs-scribe`, `release-manager` | Docs true; PR states what was verified |
+| Intake | `/tracker:pick` | `tracker-pick` | The work has an id |
+| Spec | `/sdlc:spec` | `sdlc-spec` | Acceptance criteria are testable; non-goals written |
+| Plan | `/sdlc:plan` | `sdlc-plan` | Every criterion maps to a slice; every task names its verification |
+| Implement | `/sdlc:implement` | `sdlc-implement` | Test observed failing first; repo green |
+| Review | `/sdlc:review` | `sdlc-review` | No unaddressed blockers or majors |
+| Verify | `/sdlc:verify` | `sdlc-verify` | Definition of done passes |
+| Ship | `/sdlc:ship` | `sdlc-ship` | Docs true; PR states what was verified |
 | Learn | - | - | The lesson is written where it will be read |
 
-Also: `/sdlc:bugfix` (reproduce -> red test -> root cause -> minimal fix), `/sdlc:adr`, `/sdlc:status`, `/sdlc:onboard`.
+Also: `bugfix` (reproduce -> red test -> root cause -> minimal fix), `adr`, `status`, `onboard`.
 
 ## What is in the box
 
-### `sdlc` plugin
+**Skills (15)** - `sdlc-workflow` (the hub), `spec-writing`, `task-decomposition`, `tdd-workflow`, `testing-strategy`, `code-review-standards`, `git-workflow`, `adr-writing`, `secure-coding`, `definition-of-done`, `incident-response`, `repo-onboarding`, `release-management`, plus `tracker-workflow` and `jira-integration`. They load when relevant and double as the team's written standards.
 
-**Agents** - `spec-analyst`, `codebase-explorer`, `solution-architect`, `test-author`, `task-implementer`, `code-reviewer`, `security-auditor`, `debugger`, `qa-verifier`, `docs-scribe`, `release-manager`. Each has least-privilege tools: the reviewers cannot write, the test author cannot touch production code.
+**Roles (11)** - `spec-analyst`, `codebase-explorer`, `solution-architect`, `test-author`, `task-implementer`, `code-reviewer`, `security-auditor`, `debugger`, `qa-verifier`, `docs-scribe`, `release-manager`. On Claude Code they are subagents with least-privilege tools - the reviewers cannot write, the test author cannot touch production code. On Codex they are reference roles you run as a separate `codex exec` pass.
 
-**Skills** - `sdlc-workflow` (the hub), `spec-writing`, `task-decomposition`, `tdd-workflow`, `testing-strategy`, `code-review-standards`, `git-workflow`, `adr-writing`, `secure-coding`, `definition-of-done`, `incident-response`, `repo-onboarding`, `release-management`. They load when relevant, and they double as the team's written standards.
+**Tracker** - one procedure surface, two backends. **Local**: one markdown file per work item under `docs/tracker/`, driven by a zero-dependency Node CLI. Works today. **Jira**: the same procedures against Jira Cloud - REST calls, JQL cookbook, ADF payloads, field and state mapping, failure modes, and a five-phase rollout. Documented, **not yet run against a live instance**.
 
-**Hooks** - deny destructive shell commands (`rm -rf`, `push --force`, `reset --hard`, bare `git stash`, piped installers, `DROP TABLE`), deny writes to `.env` and key material, and print branch/work-item orientation at session start. All exit 0 in every case, so a hook bug can never block your work.
+**Guardrails** - on Claude Code, hooks that deny destructive shell commands (`rm -rf`, `push --force`, `reset --hard`, bare `git stash`, piped installers, `DROP TABLE`) and writes to `.env` and key material, all exiting 0 so a hook bug can never block you. On any tool, `templates/git-hooks/pre-commit` refuses commits carrying secrets, private keys or conflict markers - it binds humans too, which is why it is the layer that matters most.
 
-### `tracker` plugin
-
-One command surface (`/tracker:pick|start|sync|comment|report`), two backends:
-
-- **`local`** - one markdown file per work item under `docs/tracker/`, driven by a zero-dependency Node CLI. Diffs, reviews, needs no service. **Works today.**
-- **`jira`** - the same commands against Jira Cloud. Fully documented (REST calls, JQL cookbook, ADF payloads, field and state mapping, failure modes) with a five-phase rollout plan. **Designed and documented, not yet exercised against a live instance** - the plan's first phases exist precisely to discover an instance's real shape rather than trust the example values.
-
-### Templates
-
-`CLAUDE.md`, `.claude/settings.json` (permission allow/deny plus hook wiring), PR template, CI quality-gates workflow, spec/ADR/tracker doc scaffolding.
+**Templates** - `AGENTS.md` project memory (with a `CLAUDE.md` pointer so there is one file, not two), permissions/settings, PR template, CI quality gates, spec/ADR/tracker scaffolding.
 
 ## Layout
 
 ```
-.claude-plugin/marketplace.json    both plugins, installable from this repo
-plugins/sdlc/                      agents, skills, commands, hooks
-plugins/tracker/                   tracker commands, skills, local backend CLI
-templates/                         CLAUDE.md, settings.json, PR + CI templates, docs scaffolding
-docs/                              adoption, walkthrough, authoring rules
-scripts/install.sh|.ps1            vendored install
-scripts/validate-kit.mjs           structural validation (run before committing)
+src/                      the single source of truth
+  skills/ agents/ commands/ hooks/ scripts/ manifest.json
+adapters/claude/          GENERATED - do not edit
+adapters/codex/           GENERATED - do not edit
+.claude-plugin/           Claude marketplace manifest (generated)
+.agents/plugins/          Codex marketplace manifest (generated)
+templates/                files copied into a target project
+docs/                     adoption, walkthrough, authoring rules
+scripts/                  build.mjs, validate-kit.mjs, install.sh, install.ps1
 ```
+
+Adapters are generated **and committed**, so installing needs no build step - and `validate-kit.mjs` fails if they have drifted from `src/`.
 
 ## Extending it
 
-Read [docs/AUTHORING.md](docs/AUTHORING.md): when to reach for a skill versus an agent versus a command versus a hook, the frontmatter contract for each, and the writing rules that keep these files as prompts rather than essays.
-
 ```bash
-node scripts/validate-kit.mjs
+node scripts/build.mjs && node scripts/validate-kit.mjs
 ```
 
-Checks frontmatter, name/filename agreement, missing `references/` files, hook scripts that do not exist, and manifest consistency.
+Edit `src/`, never `adapters/`. [docs/AUTHORING.md](docs/AUTHORING.md) covers when to reach for a skill versus a role versus a procedure versus a hook, the frontmatter contract for each, the build tokens, and the writing rules that keep these files as prompts rather than essays.
 
 ## Status
 
-The workflow, agents, skills, commands, hooks, installers, local tracker and validator are implemented and exercised. The Jira backend is a documented design with a phased rollout - the commands and mappings are written, but nothing in this repo has talked to a live Jira instance.
+| Piece | State |
+| --- | --- |
+| Skills, roles, procedures, templates, docs | Written and validated |
+| Claude Code adapter | Generated; format matches Claude Code's plugin layout |
+| Codex adapter | Generated; format derived from an installed Codex build's on-disk layout, **not yet loaded by a live Codex install** |
+| Local tracker CLI | Exercised end to end, including error paths |
+| Git pre-commit guard | Exercised against eight commit scenarios |
+| Claude Code hooks | Exercised against thirteen sample payloads |
+| Jira backend | Documented design with a phased rollout; **never run against a live instance** |
 
 ## License
 

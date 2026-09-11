@@ -1,0 +1,31 @@
+---
+description: Standup-style summary - what moved, what is in flight, what is blocked
+argument-hint: "[days, default 7]"
+allowed-tools: ["Read", "Grep", "Glob", "Bash"]
+---
+
+<!-- Generated from src/commands/tracker/report.md by scripts/build.mjs. Edit the source, not this file. -->
+
+# Report
+
+**Window:** $ARGUMENTS days (default 7)
+
+Read-only. This command never writes to the tracker.
+
+1. **Pull the tracker view.**
+   - local: `node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" report --days <n>`
+   - jira: `project=PROJ AND updated >= -<n>d ORDER BY updated DESC`, plus `statusCategory=Done AND resolutiondate >= -<n>d` for what closed.
+2. **Cross-check against git**, because the tracker is a claim and the repo is the evidence: `git log --oneline --since="<n> days ago"`, merged branches, open PRs (`gh pr list` if available).
+3. **Report in this shape:**
+
+   ```
+   Done (<n>)          id - title - PR
+   In flight (<n>)     id - title - branch, age, stage
+   Blocked (<n>)       id - title - blocker, who can clear it
+   Ready (<n>)         id - title - priority
+   ```
+
+4. **Name the discrepancies.** Merged work still open on the board; items marked in-progress with no commits in a week; branches with no item. These are the findings that make the report worth running - state them plainly rather than smoothing them over.
+5. **End with one line**: what the biggest risk to the current window is.
+
+Keep it short enough to read out loud.

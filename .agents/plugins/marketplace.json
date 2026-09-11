@@ -1,0 +1,30 @@
+{
+  "name": "sdlc-kit",
+  "interface": {
+    "displayName": "SDLC Kit"
+  },
+  "plugins": [
+    {
+      "name": "sdlc",
+      "source": {
+        "source": "local",
+        "path": "./adapters/codex/sdlc"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "workflow"
+    },
+    {
+      "name": "tracker",
+      "source": {
+        "source": "local",
+        "path": "./adapters/codex/tracker"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "workflow"
+    }
+  ]
+}

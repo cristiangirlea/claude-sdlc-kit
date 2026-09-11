@@ -1,0 +1,29 @@
+{
+  "name": "sdlc",
+  "version": "0.2.0",
+  "description": "Full SDLC workflow: spec -> plan -> implement -> review -> verify -> ship, with specialised roles, reusable skills, procedures and safety guardrails.",
+  "author": {
+    "name": "Cristian Girlea"
+  },
+  "keywords": [
+    "sdlc",
+    "workflow",
+    "tdd",
+    "code-review",
+    "adr",
+    "release"
+  ],
+  "interface": {
+    "displayName": "SDLC Workflow",
+    "shortDescription": "Full SDLC workflow: spec -> plan -> implement -> review -> verify -> ship, with specialised roles, reusable skills, procedures and safety guardrails.",
+    "longDescription": "Full SDLC workflow: spec -> plan -> implement -> review -> verify -> ship, with specialised roles, reusable skills, procedures and safety guardrails.",
+    "developerName": "Cristian Girlea",
+    "category": "workflow",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ]
+  },
+  "skills": "./skills/"
+}
