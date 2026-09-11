@@ -1,0 +1,7 @@
+# Normalise to LF in the repository and on checkout everywhere.
+# install.sh and the .mjs hooks run on Linux and macOS too; CRLF would break
+# the shebang and the shell parsing.
+* text=auto eol=lf
+
+# PowerShell keeps CRLF, which is what Windows tooling expects.
+*.ps1 text eol=crlf
