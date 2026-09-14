@@ -1,7 +1,7 @@
 ---
-description: Turn a request or tracker item into a reviewable spec with testable acceptance criteria
+description: "Turn a request or tracker item into a reviewable spec with testable acceptance criteria"
 argument-hint: "[request, ticket id, or path to notes]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "Task", "WebFetch"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit","Task","WebFetch"]
 ---
 
 <!-- Generated from src/commands/sdlc/spec.md by scripts/build.mjs. Edit the source, not this file. -->

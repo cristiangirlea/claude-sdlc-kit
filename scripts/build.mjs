@@ -22,7 +22,10 @@ import {
 } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 
-const ROOT = resolve(dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+import { fileURLToPath } from "node:url";
+import { splitFrontmatter, formatFrontmatter } from "./frontmatter.mjs";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "src");
 const CHECK = process.argv.includes("--check");
 
@@ -50,13 +53,13 @@ const ADAPTERS = {
     marketplacePath: ".agents/plugins/marketplace.json",
     pluginManifestDir: ".codex-plugin",
     tokens: {
-      // Codex has no slash commands: each procedure becomes a skill.
+      // This adapter exposes each procedure as a discoverable skill.
       CMD: (plugin, name) => `the \`${plugin}-${name}\` skill`,
-      // Codex has no subagent dispatch: roles are reference files.
-      AGENT: (name) => `\`${name}\` role (references/agents/${name}.md)`,
+      // Keep portable role references; native subagents are optional.
+      AGENT: (name) => `\`${name}\` role (../../references/agents/${name}.md, relative to this skill)`,
       MEMORY: () => "AGENTS.md",
       ARGS: () => "the user's request",
-      PLUGIN_ROOT: () => ".",
+      PLUGIN_ROOT: () => "<absolute plugin resource root>",
       SETTINGS: () => "~/.codex/config.toml",
       TOOL: () => "Codex",
     },
@@ -85,19 +88,14 @@ function applyTokens(text, adapter) {
 }
 
 function render(text, adapter) {
-  return applyTokens(applyConditionals(text, adapter), adapter);
+  const { meta, body } = splitFrontmatter(text);
+  const renderBody = value => applyTokens(applyConditionals(value, adapter), adapter);
+  if (!meta) return renderBody(text);
+  const rendered = Object.fromEntries(Object.entries(meta).map(([key, value]) =>
+    [key, Array.isArray(value) ? value.map(renderBody) : renderBody(value)]));
+  return formatFrontmatter(rendered) + renderBody(body);
 }
 
-function splitFrontmatter(text) {
-  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!m) return { meta: null, raw: "", body: text };
-  const meta = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = line.match(/^([A-Za-z0-9_-]+):\s?(.*)$/);
-    if (kv) meta[kv[1]] = kv[2].trim();
-  }
-  return { meta, raw: m[1], body: m[2] };
-}
 
 function stamp(srcRel) {
   return `<!-- Generated from src/${srcRel} by scripts/build.mjs. Edit the source, not this file. -->\n`;
@@ -132,6 +130,7 @@ const firstSentence = (description) =>
 
 function buildClaudePlugin(plugin) {
   const base = `${ADAPTERS.claude.dir}/${plugin.name}`;
+  emit(`${base}/LICENSE`, readFileSync(join(ROOT, "LICENSE"), "utf8"));
 
   emit(`${base}/.claude-plugin/plugin.json`, JSON.stringify({
     name: plugin.name,
@@ -178,8 +177,17 @@ function buildClaudePlugin(plugin) {
   }
 }
 
+function codexResources(plugin) {
+  if (plugin.name !== "tracker") return "";
+  return "\n## Runtime paths\n\nResolve [the tracker CLI](../../scripts/tracker.mjs) relative to this SKILL.md. " +
+    "Replace `<absolute plugin resource root>` in commands with the absolute directory containing that `scripts/` folder. " +
+    "Keep the working directory at the user's project root; never change into the plugin to run the tracker. " +
+    "Use `--root \"<absolute project root>\"` when running from elsewhere.\n\n";
+}
+
 function buildCodexPlugin(plugin) {
   const base = `${ADAPTERS.codex.dir}/${plugin.name}`;
+  emit(`${base}/LICENSE`, readFileSync(join(ROOT, "LICENSE"), "utf8"));
 
   emit(`${base}/.codex-plugin/plugin.json`, JSON.stringify({
     name: plugin.name,
@@ -189,6 +197,7 @@ function buildCodexPlugin(plugin) {
     keywords: plugin.keywords,
     interface: {
       displayName: plugin.displayName,
+      defaultPrompt: plugin.name === "tracker" ? "Set up the local tracker for this project." : "Onboard this repository with the SDLC workflow.",
       shortDescription: plugin.description.split(".")[0] + ".",
       longDescription: plugin.description,
       developerName: manifest.marketplace.owner.name,
@@ -203,7 +212,7 @@ function buildCodexPlugin(plugin) {
     emit(`${base}/README.md`, stamp(plugin.readme) + "\n" + render(readFileSync(src, "utf8"), "codex"));
   }
 
-  // Skills carry only name + description: that is the whole Codex contract.
+  // This adapter uses the minimal name/description skill metadata.
   for (const name of plugin.skills) {
     const dir = join(SRC, "skills", name);
     for (const rel of walk(dir)) {
@@ -213,12 +222,12 @@ function buildCodexPlugin(plugin) {
         continue;
       }
       const { meta, body } = splitFrontmatter(raw);
-      const fm = `---\nname: ${meta.name}\ndescription: ${render(meta.description, "codex")}\n---\n`;
-      emit(`${base}/skills/${name}/SKILL.md`, fm + "\n" + stamp(`skills/${name}/SKILL.md`) + render(body, "codex").replace(/^\n+/, "\n"));
+      const fm = formatFrontmatter({ name: meta.name, description: render(meta.description, "codex") });
+      emit(`${base}/skills/${name}/SKILL.md`, fm + "\n" + stamp(`skills/${name}/SKILL.md`) + codexResources(plugin) + render(body, "codex").replace(/^\n+/, "\n"));
     }
   }
 
-  // Commands have no Codex equivalent, so each becomes a skill named
+  // Commands are exposed here as skills named
   // <plugin>-<command>. The description is what makes it fire.
   if (plugin.commands) {
     const dir = join(SRC, "commands", plugin.commands);
@@ -227,23 +236,23 @@ function buildCodexPlugin(plugin) {
       const cmd = rel.replace(/\.md$/, "");
       const skillName = `${plugin.name}-${cmd}`;
       const desc = render(meta.description, "codex").replace(/\s*$/, "").replace(/([^.!?])$/, "$1.");
-      const fm = `---\nname: ${skillName}\ndescription: ${desc} Use when the user asks for the ${plugin.name} "${cmd}" step by name, or reaches that stage of the SDLC loop.\n---\n`;
+      const fm = formatFrontmatter({ name: skillName, description: `${desc} Use when the user asks for the ${plugin.name} "${cmd}" step by name, or reaches that stage of the SDLC loop.` });
       emit(
         `${base}/skills/${skillName}/SKILL.md`,
-        fm + "\n" + stamp(`commands/${plugin.commands}/${rel}`) + render(body, "codex").replace(/^\n+/, "\n")
+        fm + "\n" + stamp(`commands/${plugin.commands}/${rel}`) + codexResources(plugin) + render(body, "codex").replace(/^\n+/, "\n")
       );
     }
   }
 
-  // Agents become reference roles: Codex has no subagent dispatch, so these
-  // are run as a separate `codex exec` pass when a clean context matters.
+  // Agents become portable reference roles. Use native subagents when
+  // authorized and supported, or a separate pass when a clean context matters.
   for (const name of plugin.agents) {
     const { meta, body } = splitFrontmatter(readFileSync(join(SRC, "agents", `${name}.md`), "utf8"));
     const header =
       `# Role: ${name}\n\n` +
       stamp(`agents/${name}.md`) +
       `\n**When to use:** ${render(firstSentence(meta.description), "codex")}\n\n` +
-      `**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** ${meta.tools ?? "all"}\n\n` +
+      `**Suggested tools (this reference does not configure permissions):** ${meta.tools ?? "all"}\n\n` +
       `Run this in its own \`codex exec\` pass when the job benefits from a clean context, ` +
       `or adopt the rules below inline for a small change.\n\n---\n`;
     emit(`${base}/references/agents/${name}.md`, header + render(body, "codex"));
@@ -276,7 +285,7 @@ function buildMarketplaces() {
     plugins: manifest.plugins.map((p) => ({
       name: p.name,
       source: { source: "local", path: `./${ADAPTERS.codex.dir}/${p.name}` },
-      policy: { installation: "AVAILABLE" },
+      policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" },
       category: p.category,
     })),
   }, null, 2) + "\n");
@@ -290,10 +299,10 @@ for (const plugin of manifest.plugins) {
 }
 buildMarketplaces();
 
-const OWNED = ["adapters", ".claude-plugin", ".agents"];
+const OWNED = ["adapters/claude", "adapters/codex"];
 
 if (CHECK) {
-  const onDisk = new Set();
+  const onDisk = new Set(Object.values(ADAPTERS).map(a => a.marketplacePath).filter(p => existsSync(join(ROOT, p))));
   for (const dir of OWNED) {
     for (const rel of walk(join(ROOT, dir))) onDisk.add(`${dir}/${rel}`);
   }
@@ -317,7 +326,11 @@ if (CHECK) {
   process.exit(0);
 }
 
-for (const dir of OWNED) rmSync(join(ROOT, dir), { recursive: true, force: true });
+for (const dir of OWNED) {
+  const path = resolve(ROOT, dir);
+  if (!path.startsWith(ROOT + (process.platform === "win32" ? "\\" : "/"))) throw new Error("Output escapes repository");
+  rmSync(path, { recursive: true, force: true });
+}
 for (const [rel, content] of out) {
   const dest = join(ROOT, rel);
   mkdirSync(dirname(dest), { recursive: true });

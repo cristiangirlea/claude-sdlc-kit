@@ -1,5 +1,5 @@
 ---
-description: Add a note to a work item's log
+description: "Add a note to a work item's log"
 argument-hint: "<item id> <text>"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 ---

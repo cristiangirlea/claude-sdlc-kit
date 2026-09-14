@@ -1,6 +1,6 @@
 ---
-name: repo-onboarding
-description: How to adopt this kit in an existing repository and write the project memory it depends on - discovering the real build/test/lint commands, capturing conventions into {{MEMORY}}, setting permissions and guardrails in {{SETTINGS}}, and creating the docs/ artefact layout. Use when starting work in an unfamiliar repository, when installing this kit into a project, or when {{MEMORY}} is missing, stale or bloated.
+name: "repo-onboarding"
+description: "How to adopt this kit in an existing repository and write the project memory it depends on - discovering the real build/test/lint commands, capturing conventions into {{MEMORY}}, setting permissions and guardrails in {{SETTINGS}}, and creating the docs/ artefact layout. Use when starting work in an unfamiliar repository, when installing this kit into a project, or when {{MEMORY}} is missing, stale or bloated."
 ---
 
 # Onboarding a repository
@@ -50,10 +50,10 @@ Project-level `{{SETTINGS}}`, committed to the repo, so the whole team gets the 
 - **`hooks`** - the guardrails from this kit (see `templates/settings.json`): block dangerous Bash, deny writes to secrets, print branch and work-item context at session start.
 <!-- endif -->
 <!-- if:codex -->
-Two layers, because Codex has no per-tool-call hook:
+This kit uses the sandbox plus an optional git check. Codex also supports native hooks; configure those separately if needed:
 
 - **`{{SETTINGS}}`** - sandbox mode and approval policy. Keep writes confined to the workspace and approvals on for anything that leaves it.
-- **`.git/hooks/pre-commit`** - install `templates/git-hooks/pre-commit` from this kit. It refuses commits that carry `.env` files, private keys or credential files. Being a git hook, it binds every agent and every human, which is the right place for a rule this absolute.
+- **`.githooks/`** - copy both files from `templates/git-hooks/` and enable them with `git config core.hooksPath .githooks`. This checks selected credential and conflict patterns in staged content. It can be bypassed and is not complete secret detection.
 <!-- endif -->
 
 Start restrictive. Loosen based on the prompts you actually hit, not on speculation.

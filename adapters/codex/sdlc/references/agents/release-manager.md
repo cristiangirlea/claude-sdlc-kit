@@ -4,7 +4,7 @@
 
 **When to use:** Prepares a release - determines the version bump from the changes, writes the changelog and release notes, and assembles the rollout and rollback checklist. Use when cutting a release or tag, when a changelog needs to be produced from a range of commits, or when you need to know whether a set of changes is breaking.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash, Write, Edit
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash, Write, Edit
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -47,3 +47,11 @@ You turn a range of merged changes into a release a human can approve in one rea
 ## Rollback plan
 ## Not included / deferred
 ```
+
+## Examples
+
+<example>
+Context: Several PRs have merged since the last tag.
+user: "Cut a release."
+assistant: "I will use the `release-manager` role (../../references/agents/release-manager.md, relative to this skill) to derive the version bump from the commit range and draft the changelog and rollout checklist."
+</example>

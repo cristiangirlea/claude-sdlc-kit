@@ -1,9 +1,14 @@
 ---
-name: tracker-workflow
-description: The backend-agnostic issue model this kit uses - work item states and their meaning, the id that ties tracker item to branch to commits to PR, what belongs in an item versus a spec, and the rules for keeping the tracker honest. Use when picking up work, creating or updating a work item, wiring a branch to an item, reporting status, or deciding which backend (local files or Jira) an action should hit.
+name: "tracker-workflow"
+description: "The backend-agnostic issue model this kit uses - work item states and their meaning, the id that ties tracker item to branch to commits to PR, what belongs in an item versus a spec, and the rules for keeping the tracker honest. Use when picking up work, creating or updating a work item, wiring a branch to an item, reporting status, or deciding which backend (local files or Jira) an action should hit."
 ---
 
 <!-- Generated from src/skills/tracker-workflow/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->
+
+## Runtime paths
+
+Resolve [the tracker CLI](../../scripts/tracker.mjs) relative to this SKILL.md. Replace `<absolute plugin resource root>` in commands with the absolute directory containing that `scripts/` folder. Keep the working directory at the user's project root; never change into the plugin to run the tracker. Use `--root "<absolute project root>"` when running from elsewhere.
+
 
 # Tracker workflow
 
@@ -80,12 +85,12 @@ docs/specs/SPEC-TASK-42-saved-searches.md  spec
 ## Local backend cheatsheet
 
 ```bash
-node ./scripts/tracker.mjs list --status ready
-node ./scripts/tracker.mjs new "Add saved searches" --type feature --priority P2
-node ./scripts/tracker.mjs move TASK-42 in-progress
-node ./scripts/tracker.mjs set TASK-42 branch=feat/TASK-42-saved-searches pr=123
-node ./scripts/tracker.mjs comment TASK-42 "blocked on the auth decision"
-node ./scripts/tracker.mjs report --days 7
+node "<absolute plugin resource root>/scripts/tracker.mjs" list --status ready
+node "<absolute plugin resource root>/scripts/tracker.mjs" new "Add saved searches" --type feature --priority P2
+node "<absolute plugin resource root>/scripts/tracker.mjs" move TASK-42 in-progress
+node "<absolute plugin resource root>/scripts/tracker.mjs" set TASK-42 branch=feat/TASK-42-saved-searches pr=123
+node "<absolute plugin resource root>/scripts/tracker.mjs" comment TASK-42 "blocked on the auth decision"
+node "<absolute plugin resource root>/scripts/tracker.mjs" report --days 7
 ```
 
-(Run these from the plugin root, the way the bundled Codex skills do.)
+(Resolve the helper relative to this skill as described in Runtime paths. Run it from the user project root, never from the plugin directory.)

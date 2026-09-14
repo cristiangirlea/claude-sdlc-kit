@@ -4,7 +4,7 @@
 
 **When to use:** Writes the tests for a change - failing tests first in a TDD loop, or coverage-gap tests for code that already exists. Use when starting a slice from an approved plan, when a bug needs a reproduction test before the fix, or when a diff adds behaviour that nothing asserts. Writes test files only; it does not touch production code.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash, Write, Edit
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash, Write, Edit
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -40,3 +40,17 @@ You write tests that fail for the right reason and pass only when the behaviour 
 ## Not covered, and why
 ## Production seams needed (if any)
 ```
+
+## Examples
+
+<example>
+Context: A slice from the plan is about to be implemented.
+user: "Start slice 1: saved-search persistence."
+assistant: "I will use the `test-author` role (../../references/agents/test-author.md, relative to this skill) to write the failing tests for the slice's acceptance criteria before any production code is written."
+</example>
+
+<example>
+Context: A bug report with reproduction steps.
+user: "Matching returns duplicates when two filters overlap."
+assistant: "First a red test - I will use the `test-author` role (../../references/agents/test-author.md, relative to this skill) to encode the duplicate case as a failing test."
+</example>

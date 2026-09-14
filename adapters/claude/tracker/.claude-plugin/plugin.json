@@ -1,6 +1,6 @@
 {
   "name": "tracker",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tracker-agnostic issue workflow. A zero-dependency local file backend works out of the box; a Jira adapter (REST or MCP) drops in behind the same procedures.",
   "author": {
     "name": "Cristian Girlea"

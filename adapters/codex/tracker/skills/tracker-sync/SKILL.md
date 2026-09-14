@@ -1,9 +1,14 @@
 ---
-name: tracker-sync
-description: Push the repository's state - branch, PR, status - back onto the work item. Use when the user asks for the tracker "sync" step by name, or reaches that stage of the SDLC loop.
+name: "tracker-sync"
+description: "Push the repository's state - branch, PR, status - back onto the work item. Use when the user asks for the tracker \"sync\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/tracker/sync.md by scripts/build.mjs. Edit the source, not this file. -->
+
+## Runtime paths
+
+Resolve [the tracker CLI](../../scripts/tracker.mjs) relative to this SKILL.md. Replace `<absolute plugin resource root>` in commands with the absolute directory containing that `scripts/` folder. Keep the working directory at the user's project root; never change into the plugin to run the tracker. Use `--root "<absolute project root>"` when running from elsewhere.
+
 
 # Sync the item
 

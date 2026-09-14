@@ -14,15 +14,23 @@ The kit stays in its own repo; projects reference it. Updates arrive by updating
 /plugin install tracker@sdlc-kit
 ```
 
-**Codex:** add the same repo as a marketplace and install the same two plugins. The Codex adapter lives in `adapters/codex/`, with its manifest at `.agents/plugins/marketplace.json`.
+**Codex:**
 
-Nothing is copied into the project; the procedures, skills and guardrails are available in every repo where you enable the plugin.
+```bash
+codex plugin marketplace add cristiangirlea/claude-sdlc-kit
+codex plugin add sdlc@sdlc-kit
+codex plugin add tracker@sdlc-kit
+```
+
+Start a fresh session after installation. The Codex adapter lives in `adapters/codex/`, with its marketplace manifest at `.agents/plugins/marketplace.json`.
+
+The plugin manager installs procedures and skills outside the project. The Claude plugin includes session hooks; the Codex adapter does not install native hooks. The git guard is a separate, optional project installation.
 
 **Use this when** you want one canonical copy across many projects, and updates without a per-repo pull.
 
 ## Route B - vendored into the project
 
-Copy the files into the target repo (`.claude/` or `.codex/`) and commit them.
+Clone this kit and run its installer from the clone. Files go into `.claude/` for Claude or `.agents/skills`, `.agents/scripts`, and `.agents/references` for Codex. Review and commit the installed files.
 
 ```bash
 ./scripts/install.sh /path/to/repo --tool claude --templates
@@ -50,7 +58,13 @@ On Codex, ask for the `sdlc-onboard` skill - same procedure, same output.
 Then set up tracking (`/tracker:setup local`, or the `tracker-setup` skill), and install the guardrail that does not depend on which tool anyone is using:
 
 ```bash
-git config core.hooksPath .githooks && chmod +x .githooks/pre-commit
+# The --templates installer already copies both guard files.
+# For marketplace installs, from a local clone of this kit:
+mkdir -p /path/to/project/.githooks
+cp templates/git-hooks/pre-commit templates/git-hooks/pre-commit.mjs /path/to/project/.githooks/
+cd /path/to/project
+chmod +x .githooks/pre-commit
+git config core.hooksPath .githooks
 ```
 
 ## Staged rollout for a team
@@ -69,7 +83,7 @@ git config core.hooksPath .githooks && chmod +x .githooks/pre-commit
 | --- | --- |
 | `templates/settings.json` -> `.claude/settings.json` | The project's real commands in `allow`; keep `deny` strict (Claude Code) |
 | `~/.codex/config.toml` | Sandbox mode and approval policy (Codex) |
-| `templates/git-hooks/pre-commit` | Extra patterns your org leaks; it binds humans too |
+| `templates/git-hooks/pre-commit.mjs` | Extra credential patterns relevant to the project; the optional check also runs for ordinary human commits |
 | `AGENTS.md` | Everything - it is per project by definition |
 | `definition-of-done` skill | Add the gates your domain needs (accessibility, compliance, i18n, performance budgets) |
 | `code-review-standards` skill | Add the defect classes your incidents actually produce |

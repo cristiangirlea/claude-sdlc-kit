@@ -1,6 +1,6 @@
 ---
-name: sdlc-plan
-description: Turn an approved spec into a design and an ordered list of verifiable slices. Use when the user asks for the sdlc "plan" step by name, or reaches that stage of the SDLC loop.
+name: "sdlc-plan"
+description: "Turn an approved spec into a design and an ordered list of verifiable slices. Use when the user asks for the sdlc \"plan\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/sdlc/plan.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -9,11 +9,11 @@ description: Turn an approved spec into a design and an ordered list of verifiab
 
 **Spec:** the user's request (if empty, use the most recently modified file in `docs/specs/`)
 
-Follow `task-decomposition`; the design work belongs to the `solution-architect` role (references/agents/solution-architect.md).
+Follow `task-decomposition`; the design work belongs to the `solution-architect` role (../../references/agents/solution-architect.md, relative to this skill).
 
 1. **Read the spec.** If it has unanswered open questions with no recommended default, ask the user now - do not plan around a hole.
-2. **Understand the ground.** If the affected code is unfamiliar, run the `codebase-explorer` role (references/agents/codebase-explorer.md) over the relevant paths first and feed its map into the planning step.
-3. **Run the `solution-architect` role (references/agents/solution-architect.md)** with the spec plus the exploration map. It returns: chosen design, rejected alternatives, file-level changes, ordered slices, test strategy, rollout, ADR candidates.
+2. **Understand the ground.** If the affected code is unfamiliar, run the `codebase-explorer` role (../../references/agents/codebase-explorer.md, relative to this skill) over the relevant paths first and feed its map into the planning step.
+3. **Run the `solution-architect` role (../../references/agents/solution-architect.md, relative to this skill)** with the spec plus the exploration map. It returns: chosen design, rejected alternatives, file-level changes, ordered slices, test strategy, rollout, ADR candidates.
 4. **Check the plan yourself** before showing it:
    - Every acceptance criterion maps to at least one slice.
    - Every task names its verification.

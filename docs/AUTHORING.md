@@ -14,7 +14,7 @@ node scripts/build.mjs && node scripts/validate-kit.mjs
 src/skills/<name>/SKILL.md        knowledge, loaded when the description matches
 src/agents/<name>.md              a role with its own context window (Claude) / its own pass (Codex)
 src/commands/<plugin>/<name>.md   a procedure a human invokes by name
-src/hooks/                        deterministic enforcement (Claude Code only)
+src/hooks/                        limited session checks (wired for Claude Code)
 src/scripts/                      real programs, tool-agnostic
 src/manifest.json                 which of the above ships in which plugin
 ```
@@ -30,9 +30,9 @@ src/manifest.json                 which of the above ships in which plugin
 | Give the user a repeatable procedure to invoke by name | **Command** |
 | Enforce something regardless of what the model decides | **Hook**, or better, a **git hook** |
 
-The distinction that matters: a skill is *loaded when relevant*, a role is *run with its own context*, a command is *invoked by a human*, and a hook *always runs*. If a rule must hold every time, it is a hook - not a paragraph in a skill hoping to be read.
+The distinction that matters: a skill is *loaded when relevant*, a role is *run with its own context*, a command is *invoked by a human*, and a configured hook *runs on its supported events*. If a rule must hold every time, it is a hook - not a paragraph in a skill hoping to be read.
 
-And if it must hold for humans too, it belongs in `templates/git-hooks/pre-commit`, not in any agent's hook system. That is the only layer that survives someone switching tools.
+The optional files in `templates/git-hooks/` check normal commits across tools. Local hooks can be disabled or bypassed; absolute enforcement requires sandbox or server-side policy.
 
 ## Writing for two tools at once
 
@@ -46,7 +46,7 @@ Source files are rendered per adapter. Two constructs do the work.
 | `{{AGENT:code-reviewer}}` | `` `code-reviewer` agent `` | `` `code-reviewer` role (references/agents/…) `` |
 | `{{MEMORY}}` | `CLAUDE.md` | `AGENTS.md` |
 | `{{ARGS}}` | `$ARGUMENTS` | `the user's request` |
-| `{{PLUGIN_ROOT}}` | `${CLAUDE_PLUGIN_ROOT}` | `.` |
+| `{{PLUGIN_ROOT}}` | `${CLAUDE_PLUGIN_ROOT}` | `<absolute plugin resource root>` resolved from the skill's linked helper |
 | `{{SETTINGS}}` | `.claude/settings.json` | `~/.codex/config.toml` |
 | `{{TOOL}}` | `Claude Code` | `Codex` |
 
@@ -65,6 +65,10 @@ The equivalent that is true for Codex.
 
 Use these only where the tools genuinely diverge - guardrail mechanics, dispatch, the `!` command prefill. Reach for a token first; a conditional block is two pieces of prose to keep true instead of one.
 
+All frontmatter is a flat map whose values are JSON-quoted strings or string arrays. This subset is valid YAML and is strictly parsed by `scripts/frontmatter.mjs`. Use JSON escaping for quotes and backslashes; unsupported block scalars or unquoted values fail validation.
+
+Resolve Codex helper links relative to the loaded skill file, then invoke the absolute script path while retaining the project working directory. Never change into the plugin cache to run a project tracker command.
+
 ## Skills
 
 ```
@@ -74,8 +78,8 @@ src/skills/<kebab-case-name>/references/*.md    # optional, loaded on demand
 
 ```yaml
 ---
-name: skill-name              # must equal the directory name
-description: What this covers, and WHEN to use it - the triggering situations, in the user's words.
+name: "skill-name"
+description: "What this covers and when to use it."
 ---
 ```
 
@@ -89,11 +93,11 @@ description: What this covers, and WHEN to use it - the triggering situations, i
 
 ```yaml
 ---
-name: agent-name              # must equal the filename
-description: When to dispatch this, with 1-2 <example> blocks showing the trigger.
-tools: Read, Grep, Glob, Bash   # least privilege - omit Write/Edit for read-only roles
-model: inherit
-color: cyan
+name: "agent-name"
+description: "When to dispatch this role. Put examples in the body."
+tools: "Read, Grep, Glob, Bash"
+model: "inherit"
+color: "cyan"
 ---
 ```
 
@@ -107,7 +111,7 @@ Body structure that works: **role** (one line), **operating rules** (numbered, n
 
 ```yaml
 ---
-description: One line, imperative - it shows in the command list and becomes the Codex skill's trigger.
+description: "One line describing the procedure and when to invoke it."
 argument-hint: "[what to pass]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
 ---

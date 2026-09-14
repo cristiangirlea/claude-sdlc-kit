@@ -21,7 +21,7 @@ The development loop: **intake -> spec -> plan -> implement -> review -> verify 
 
 ## Agents
 
-Dispatched into their own context window, each with least-privilege tools.
+Dispatched into their own context window with scoped tool lists. The writes column describes role instructions; Bash access and unrestricted file tools are not path-level enforcement.
 
 | Agent | Role | Writes? |
 | --- | --- | --- |
@@ -51,13 +51,11 @@ Loaded automatically when relevant; readable on their own as the team's written 
 | `protect-sensitive-files.mjs` | PreToolUse(Write/Edit) | Denies writes to `.env`, private keys, credential files |
 | `session-context.mjs` | SessionStart | Prints branch, derived work item, spec/plan status |
 
-All three exit 0 in every case; a bug in a hook can never block your work.
+The scripts exit 0 and return denials in JSON. They fail open on internal errors; missing Node or a timeout can still produce a client hook error. These checks are not a complete security boundary.
 
-The kit also ships `templates/git-hooks/pre-commit`, which refuses commits
-carrying secrets or key material. Install it as well: it binds humans and other
-tools, not just this session.
+The kit also ships a launcher and Node scanner in `templates/git-hooks/`. Once enabled, they check selected staged filename/content patterns for every normal git commit, including commits from other tools. Hooks can be bypassed.
 
 ## Requirements
 
-Node.js 18+ for the tracker CLI and (on Claude Code) the hooks. The workflow
+Node.js 22+ for the tracker CLI and (on Claude Code) the hooks. The workflow
 itself needs nothing.

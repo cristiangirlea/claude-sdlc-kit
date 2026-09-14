@@ -15,7 +15,10 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 
-const ROOT = resolve(dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+import { fileURLToPath } from "node:url";
+import { splitFrontmatter } from "./frontmatter.mjs";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "src");
 
 const errors = [];
@@ -37,17 +40,8 @@ function readJson(relPath) {
 }
 
 function frontmatter(path) {
-  const raw = readFileSync(path, "utf8");
-  const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---(\r?\n|$)/);
-  if (!m) return null;
-  const meta = {};
-  let key = null;
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = line.match(/^([A-Za-z0-9_-]+):\s?(.*)$/);
-    if (kv) { key = kv[1]; meta[key] = kv[2].trim(); }
-    else if (key && /^\s+\S/.test(line)) meta[key] = `${meta[key]} ${line.trim()}`.trim();
-  }
-  return meta;
+  try { return splitFrontmatter(readFileSync(path, "utf8")).meta; }
+  catch (error) { err(rel(path), error.message); return null; }
 }
 
 const listDirs = (d) => (existsSync(d) ? readdirSync(d).map((f) => join(d, f)).filter((p) => statSync(p).isDirectory()) : []);

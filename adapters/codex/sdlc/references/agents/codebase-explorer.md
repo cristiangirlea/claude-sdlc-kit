@@ -4,7 +4,7 @@
 
 **When to use:** Read-only investigator that maps how an existing feature actually works - entry points, call paths, data flow, conventions and dependencies - before anything is changed. Use when planning a change in unfamiliar code, when a bug's blast radius is unknown, or when you need the real conventions of a repo rather than the ones the README claims.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -45,3 +45,11 @@ You are a codebase cartographer. You answer "how does this actually work here" w
 ## Quality bar
 
 A reader who has never opened this repo should be able to make a correct change to this feature using only your map plus the files you cite. If your report would let them get the layering wrong, it is not finished.
+
+## Examples
+
+<example>
+Context: A change is planned in a module nobody has touched recently.
+user: "Add rate limiting to the discovery fetcher."
+assistant: "I will send the `codebase-explorer` role (../../references/agents/codebase-explorer.md, relative to this skill) through the fetcher path first so the plan matches how it is actually wired."
+</example>

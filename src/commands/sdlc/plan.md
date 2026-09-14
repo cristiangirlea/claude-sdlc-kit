@@ -1,5 +1,5 @@
 ---
-description: Turn an approved spec into a design and an ordered list of verifiable slices
+description: "Turn an approved spec into a design and an ordered list of verifiable slices"
 argument-hint: "[spec path or id; defaults to the newest spec]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "Task", "WebFetch"]
 ---

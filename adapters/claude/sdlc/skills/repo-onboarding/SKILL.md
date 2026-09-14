@@ -1,6 +1,6 @@
 ---
-name: repo-onboarding
-description: How to adopt this kit in an existing repository and write the project memory it depends on - discovering the real build/test/lint commands, capturing conventions into CLAUDE.md, setting permissions and guardrails in .claude/settings.json, and creating the docs/ artefact layout. Use when starting work in an unfamiliar repository, when installing this kit into a project, or when CLAUDE.md is missing, stale or bloated.
+name: "repo-onboarding"
+description: "How to adopt this kit in an existing repository and write the project memory it depends on - discovering the real build/test/lint commands, capturing conventions into CLAUDE.md, setting permissions and guardrails in .claude/settings.json, and creating the docs/ artefact layout. Use when starting work in an unfamiliar repository, when installing this kit into a project, or when CLAUDE.md is missing, stale or bloated."
 ---
 
 <!-- Generated from src/skills/repo-onboarding/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

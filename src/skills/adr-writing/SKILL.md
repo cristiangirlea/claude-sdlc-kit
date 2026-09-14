@@ -1,6 +1,6 @@
 ---
-name: adr-writing
-description: When a decision deserves an Architecture Decision Record and how to write one - context, options with real trade-offs, the decision, consequences including the bad ones, and how to supersede an ADR later. Use when a choice is hard to reverse (schema, dependency, public contract, auth model, data location, deployment shape), when someone asks why the system is built this way, or when reversing a previous decision.
+name: "adr-writing"
+description: "When a decision deserves an Architecture Decision Record and how to write one - context, options with real trade-offs, the decision, consequences including the bad ones, and how to supersede an ADR later. Use when a choice is hard to reverse (schema, dependency, public contract, auth model, data location, deployment shape), when someone asks why the system is built this way, or when reversing a previous decision."
 ---
 
 # Architecture Decision Records

@@ -1,5 +1,5 @@
 ---
-description: Record an architecture decision - context, options, decision, consequences
+description: "Record an architecture decision - context, options, decision, consequences"
 argument-hint: "[the decision, or the question to be decided]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 ---

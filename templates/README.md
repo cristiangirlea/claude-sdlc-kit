@@ -6,7 +6,7 @@ Files to copy into a target project. `scripts/install.sh --templates` (or `insta
 | --- | --- | --- |
 | `AGENTS.md` | repo root | Project memory, loaded into every session. Prefer generating it with the onboard procedure, which verifies every command it writes down |
 | `CLAUDE.md` | repo root | One-line pointer at `AGENTS.md`, so Claude Code and Codex read the same file |
-| `git-hooks/pre-commit` | `.githooks/pre-commit` | Refuses commits carrying secrets, keys or conflict markers. Enable with `git config core.hooksPath .githooks` |
+| `git-hooks/pre-commit` and `pre-commit.mjs` | `.githooks/` | Limited staged-content credential/conflict checks; needs Node.js and Git Bash/Bash. Enable with `git config core.hooksPath .githooks` |
 | `settings.json` | `.claude/settings.json` | Permissions and hook wiring (Claude Code). Commit it - the whole team gets the same behaviour |
 | `.github/pull_request_template.md` | `.github/` | The Verification section is the one that matters |
 | `.github/workflows/quality-gates.yml` | `.github/workflows/` | Example CI running the same gates as `/sdlc:verify` |

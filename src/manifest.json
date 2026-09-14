@@ -1,11 +1,13 @@
 {
   "$comment": "Single source of truth for what goes into each plugin. scripts/build.mjs renders adapters/<tool>/ from src/ using this. Never edit adapters/ by hand.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "marketplace": {
     "name": "sdlc-kit",
     "displayName": "SDLC Kit",
     "description": "Opinionated, project-agnostic kit for a full software development lifecycle: specs, planning, TDD implementation, review, verification, shipping, and issue-tracker integration.",
-    "owner": { "name": "Cristian Girlea" }
+    "owner": {
+      "name": "Cristian Girlea"
+    }
   },
   "plugins": [
     {
@@ -13,7 +15,14 @@
       "displayName": "SDLC Workflow",
       "category": "workflow",
       "description": "Full SDLC workflow: spec -> plan -> implement -> review -> verify -> ship, with specialised roles, reusable skills, procedures and safety guardrails.",
-      "keywords": ["sdlc", "workflow", "tdd", "code-review", "adr", "release"],
+      "keywords": [
+        "sdlc",
+        "workflow",
+        "tdd",
+        "code-review",
+        "adr",
+        "release"
+      ],
       "readme": "plugin-readme-sdlc.md",
       "skills": [
         "sdlc-workflow",
@@ -51,12 +60,22 @@
       "displayName": "Issue Tracker",
       "category": "workflow",
       "description": "Tracker-agnostic issue workflow. A zero-dependency local file backend works out of the box; a Jira adapter (REST or MCP) drops in behind the same procedures.",
-      "keywords": ["jira", "issues", "tracker", "sdlc"],
+      "keywords": [
+        "jira",
+        "issues",
+        "tracker",
+        "sdlc"
+      ],
       "readme": "plugin-readme-tracker.md",
-      "skills": ["tracker-workflow", "jira-integration"],
+      "skills": [
+        "tracker-workflow",
+        "jira-integration"
+      ],
       "agents": [],
       "commands": "tracker",
-      "scripts": ["tracker.mjs"],
+      "scripts": [
+        "tracker.mjs"
+      ],
       "hooks": false
     }
   ]

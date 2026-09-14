@@ -10,7 +10,7 @@
 import { readFileSync } from "node:fs";
 
 const DENY = [
-  { re: /(^|[\\/])\.env(\.|$)(?!example|sample|template)/i, why: "`.env` files hold real secrets. Edit `.env.example` with placeholder values instead, and ask the user to set the real value themselves." },
+  { re: /(^|[\\/])\.env(?=$|\.)(?!\.(?:example|sample|template)$)/i, why: "`.env` files hold real secrets. Edit `.env.example` with placeholder values instead, and ask the user to set the real value themselves." },
   { re: /(^|[\\/])(id_rsa|id_ed25519|id_ecdsa)(\.pub)?$/i, why: "SSH key material." },
   { re: /\.(pem|key|p12|pfx|keystore|jks)$/i, why: "Private key or certificate store." },
   { re: /(^|[\\/])\.(aws|ssh|gnupg)[\\/]/i, why: "Credential directory." },

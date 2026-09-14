@@ -10,12 +10,20 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node }}
 
       # Frontmatter, manifest coverage, adapter structure, and - last - that
       # adapters/ is in sync with src/. A stale adapter is the failure mode
@@ -26,5 +34,20 @@ jobs:
       - name: Installer syntax
         run: bash -n scripts/install.sh
 
+      - name: Behavioral regressions
+        run: node --test scripts/test-kit.mjs
+
       - name: Hooks are syntactically valid
-        run: for f in src/hooks/*.mjs src/scripts/*.mjs scripts/*.mjs; do node --check "$f"; done
+        run: for f in src/hooks/*.mjs src/scripts/*.mjs scripts/*.mjs templates/git-hooks/*.mjs; do node --check "$f"; done
+
+  claude-plugin-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate packaged plugins with the Claude CLI
+        run: |
+          npx --yes --package @anthropic-ai/claude-code@2.1.270 claude plugin validate adapters/claude/sdlc
+          npx --yes --package @anthropic-ai/claude-code@2.1.270 claude plugin validate adapters/claude/tracker

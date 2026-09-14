@@ -1,6 +1,6 @@
 ---
-name: incident-response
-description: How to handle a production incident - stabilise before diagnosing, communicate on a clock, mitigate with the cheapest reversible action, then run a blameless postmortem that produces tracked actions. Use when something is broken in production, when an alert fires, when a deploy needs rolling back, or when writing the postmortem afterwards.
+name: "incident-response"
+description: "How to handle a production incident - stabilise before diagnosing, communicate on a clock, mitigate with the cheapest reversible action, then run a blameless postmortem that produces tracked actions. Use when something is broken in production, when an alert fires, when a deploy needs rolling back, or when writing the postmortem afterwards."
 ---
 
 # Incident response

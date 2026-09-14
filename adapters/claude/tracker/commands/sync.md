@@ -1,7 +1,7 @@
 ---
-description: Push the repository's state - branch, PR, status - back onto the work item
+description: "Push the repository's state - branch, PR, status - back onto the work item"
 argument-hint: "[optional: item id; defaults to the id in the branch name]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit"]
 ---
 
 <!-- Generated from src/commands/tracker/sync.md by scripts/build.mjs. Edit the source, not this file. -->

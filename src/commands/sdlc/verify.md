@@ -1,5 +1,5 @@
 ---
-description: Run the project's quality gates and the definition-of-done checklist
+description: "Run the project's quality gates and the definition-of-done checklist"
 argument-hint: "[optional: a specific gate - build | lint | test | all]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
 ---

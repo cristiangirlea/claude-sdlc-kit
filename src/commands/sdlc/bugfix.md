@@ -1,5 +1,5 @@
 ---
-description: Fix a bug the disciplined way - reproduce, red test, root cause, minimal fix
+description: "Fix a bug the disciplined way - reproduce, red test, root cause, minimal fix"
 argument-hint: "[bug description, tracker id, or failing test name]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "Task", "TodoWrite"]
 ---

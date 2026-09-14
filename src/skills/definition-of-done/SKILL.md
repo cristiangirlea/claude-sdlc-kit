@@ -1,6 +1,6 @@
 ---
-name: definition-of-done
-description: The gate that decides whether a piece of work is actually finished - code, tests, docs, security, operability, tracker and rollback - plus the rule that "done" means observed, not assumed. Use before claiming a task is complete, before opening a pull request, before merging, and when someone asks whether something is ready to ship.
+name: "definition-of-done"
+description: "The gate that decides whether a piece of work is actually finished - code, tests, docs, security, operability, tracker and rollback - plus the rule that \"done\" means observed, not assumed. Use before claiming a task is complete, before opening a pull request, before merging, and when someone asks whether something is ready to ship."
 ---
 
 # Definition of done

@@ -1,9 +1,9 @@
 ---
-name: qa-verifier
-description: Runs the project's quality gates - build, lint, type-check, tests, coverage on changed code - and returns a compact pass/fail report with only the failures that matter. Use before a review, before a PR, and after any fix, especially when the full output would be thousands of lines of noise.\n\n<example>\nContext: A slice is implemented and the caller wants the gate result without the log dump.\nuser: "Is it green?"\nassistant: "I will use the `qa-verifier` agent to run build, lint and tests and report just the failures."\n</example>
-tools: Read, Grep, Glob, Bash
-model: inherit
-color: green
+name: "qa-verifier"
+description: "Runs the project's quality gates - build, lint, type-check, tests, coverage on changed code - and returns a compact pass/fail report with only the failures that matter. Use before a review, before a PR, and after any fix, especially when the full output would be thousands of lines of noise."
+tools: "Read, Grep, Glob, Bash"
+model: "inherit"
+color: "green"
 ---
 
 <!-- Generated from src/agents/qa-verifier.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -48,3 +48,11 @@ Pre-existing on base: yes|no|unknown
 
 ## Skipped and why
 ```
+
+## Examples
+
+<example>
+Context: A slice is implemented and the caller wants the gate result without the log dump.
+user: "Is it green?"
+assistant: "I will use the `qa-verifier` agent to run build, lint and tests and report just the failures."
+</example>

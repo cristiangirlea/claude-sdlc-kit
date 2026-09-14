@@ -1,7 +1,7 @@
 ---
-description: Show what to work on next, or capture a new work item
+description: "Show what to work on next, or capture a new work item"
 argument-hint: "[optional: a title to capture instead of picking]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit"]
 ---
 
 <!-- Generated from src/commands/tracker/pick.md by scripts/build.mjs. Edit the source, not this file. -->

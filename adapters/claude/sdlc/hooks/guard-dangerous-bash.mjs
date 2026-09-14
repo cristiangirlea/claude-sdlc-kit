@@ -20,12 +20,15 @@ import { join } from "node:path";
 
 const RULES = [
   {
-    // rm -rf on an absolute path, a home path, or the repo root
-    re: /\brm\s+(-[a-zA-Z]*\s+)*-[a-zA-Z]*[rR][a-zA-Z]*f|\brm\s+(-[a-zA-Z]*\s+)*-[a-zA-Z]*f[a-zA-Z]*[rR]/,
+    test: command => [...command.matchAll(/\brm\s+((?:(?:-[a-zA-Z]+|--recursive|--force)\s+)+)/g)].some(match => {
+      const flags = match[1].trim().split(/\s+/);
+      return flags.some(f => f === "--recursive" || /^-[^-]*[rR]/.test(f)) &&
+        flags.some(f => f === "--force" || /^-[^-]*f/.test(f));
+    }),
     why: "Recursive force delete. Ask the human to run it, or delete specific paths without -rf.",
   },
   {
-    re: /\bgit\s+push\b[^\n]*--force(?!-with-lease)/,
+    re: /\bgit\s+push\b[^\n]*(?:--force(?!-with-lease)\b|\s-[a-zA-Z]*f\b)/,
     why: "Force push rewrites history other people may have. Use --force-with-lease on your own branch, and only when the user explicitly asks.",
   },
   {
@@ -100,7 +103,10 @@ function main() {
 
   if (allowList(payload.cwd).includes(command.trim())) return;
 
-  const hit = RULES.find((r) => r.re.test(command));
+  // Normalize common Git global options for matching only. This is a limited
+  // heuristic, not a shell parser or a substitute for sandbox permissions.
+  const normalized = command.replace(/\bgit(?:\s+(?:-C|-c|--git-dir|--work-tree)(?:=|\s+)(?:"[^"]*"|'[^']*'|[^\s;&|]+))+\s+/g, "git ");
+  const hit = RULES.find((r) => r.test ? r.test(normalized) : r.re.test(normalized));
   if (!hit) return;
 
   process.stdout.write(

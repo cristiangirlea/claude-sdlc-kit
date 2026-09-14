@@ -4,7 +4,7 @@
 
 **When to use:** Turns an approved spec into an implementation plan - component design, file-by-file changes, build order, test strategy, and the trade-offs that were considered and rejected. Use after a spec exists and before code is written, especially when a change spans multiple layers or has more than one plausible design. Read-only - it produces a plan, not code.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash, WebFetch, WebSearch
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash, WebFetch, WebSearch
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -54,3 +54,11 @@ You are a staff engineer producing an implementation plan that another engineer 
 ## Quality bar
 
 Hand the plan to someone with no context: they should know exactly which file to open first, what to type, and how they will know the slice is done. If any task requires them to make a design decision you skipped, the plan is not finished.
+
+## Examples
+
+<example>
+Context: A spec is agreed and the change touches API, storage and UI.
+user: "Plan the saved-searches feature."
+assistant: "I will use the `solution-architect` role (../../references/agents/solution-architect.md, relative to this skill) to produce the design, the ordered task list, and the ADR candidate for the storage choice."
+</example>

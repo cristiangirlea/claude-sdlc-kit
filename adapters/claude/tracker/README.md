@@ -8,7 +8,7 @@ One command surface, two backends. Work the same way whether the team's issues l
 
 | Backend | State | Needs |
 | --- | --- | --- |
-| `local` (default) | Working, exercised | Node.js 18+ |
+| `local` (default) | Working, exercised | Node.js 22+ |
 | `jira` | Designed and documented, **not yet run against a live instance** | API token or the Atlassian MCP server |
 
 Chosen per repo in `.sdlc/tracker.json`:
@@ -33,13 +33,13 @@ Chosen per repo in `.sdlc/tracker.json`:
 One markdown file per item under `docs/tracker/`, with `key: value` frontmatter and a dated log. Plain files on purpose: they diff, they review, they need no service, and they are readable by a person and an agent alike.
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs new "Add saved searches" --type feature --priority P2
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs list --status ready
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs move TASK-1 in-progress
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs set TASK-1 branch=feat/TASK-1-saved-searches pr=123
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs comment TASK-1 "blocked on the auth decision"
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs report --days 7
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs next
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" new "Add saved searches" --type feature --priority P2
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" list --status ready
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" move TASK-1 in-progress
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" set TASK-1 branch=feat/TASK-1-saved-searches pr=123
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" comment TASK-1 "blocked on the auth decision"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" report --days 7
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" next
 ```
 
 States: `backlog -> ready -> in-progress -> in-review -> done`, plus `blocked`.
@@ -49,3 +49,5 @@ States: `backlog -> ready -> in-progress -> in-review -> done`, plus `blocked`.
 Read `skills/jira-integration/SKILL.md` for setup and field mapping, `references/jira-rest.md` for the exact calls, and `references/jira-setup-plan.md` for the phased rollout.
 
 The short version: **discover, do not assume** - transition ids, custom field ids and required fields are instance-specific; **reads are free, writes are confirmed**; **the first end-to-end run goes to a sandbox project**; and a session never closes a ticket on its own judgement.
+
+Resolve the tracker script by its installed absolute path and run from the project root. For a different working directory, pass `--root "<absolute project root>"`. Never save project items in the plugin cache.

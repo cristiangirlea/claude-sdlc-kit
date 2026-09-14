@@ -2,7 +2,9 @@
 
 A reusable, project-agnostic kit for running a real software development lifecycle with a coding agent: **spec -> plan -> implement -> review -> verify -> ship -> learn**, with a gate between every stage and an issue tracker that works today with no service to sign up for.
 
-Written once in `src/`, shipped to **Claude Code** and **Codex** as generated adapters. 15 skills, 11 roles, 16 procedures, guardrails at both the session and the git layer. No dependencies beyond Node.js 18+.
+Written once in `src/`, shipped to **Claude Code** and **Codex** as generated adapters. 15 skills, 11 roles, 16 procedures, guardrails at both the session and the git layer. Runtime scripts use only the Node.js standard library. Use Node.js 22+, Git, and Bash (Git Bash on Windows) for the optional git guard; the Windows installer uses PowerShell.
+
+**Experimental community kit.** Review its prompts and settings before adopting it. It is not affiliated with Anthropic or OpenAI.
 
 ## Why
 
@@ -34,7 +36,15 @@ Then `/sdlc:onboard` to ground it in the project, and `/tracker:setup local`.
 
 ### Codex
 
-Add this repo as a marketplace and install the same two plugins, or vendor the files:
+Install from the CLI, then start a fresh Codex session:
+
+```bash
+codex plugin marketplace add cristiangirlea/claude-sdlc-kit
+codex plugin add sdlc@sdlc-kit
+codex plugin add tracker@sdlc-kit
+```
+
+Or clone the repository and vendor the files:
 
 ```bash
 ./scripts/install.sh /path/to/repo --tool codex --templates
@@ -44,6 +54,15 @@ Then ask for the `sdlc-onboard` skill, and `tracker-setup`.
 
 ### Vendored (either tool)
 
+First clone the kit and enter its directory:
+
+```bash
+git clone https://github.com/cristiangirlea/claude-sdlc-kit.git
+cd claude-sdlc-kit
+```
+
+The target directory must already exist. Then run either installer:
+
 ```bash
 ./scripts/install.sh /path/to/repo --tool claude --templates
 ```
@@ -52,7 +71,7 @@ Then ask for the `sdlc-onboard` skill, and `tracker-setup`.
 .\scripts\install.ps1 -Target C:\src\my-repo -Tool claude -Templates
 ```
 
-Files land in the target repo and are committed there, so the team gets them with a pull. `--dry-run` previews; existing files are skipped unless `--force`.
+Files land in the target repo; review and commit them so the team gets them with a pull. Codex discovers the installed skills under `.agents/skills/`; Claude uses `.claude/`. `--dry-run` previews; existing files are skipped unless `--force`. Upgrade existing installations by reviewing and merging skipped files, or deliberately replacing them with `--force`. Run vendored Claude tracker commands from the project root. The tracker CLI also accepts `--root "<project directory>"`.
 
 Full instructions and a staged team rollout: [docs/ADOPTION.md](docs/ADOPTION.md).
 A worked example of one feature going through the loop: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
@@ -76,11 +95,11 @@ Also: `bugfix` (reproduce -> red test -> root cause -> minimal fix), `adr`, `sta
 
 **Skills (15)** - `sdlc-workflow` (the hub), `spec-writing`, `task-decomposition`, `tdd-workflow`, `testing-strategy`, `code-review-standards`, `git-workflow`, `adr-writing`, `secure-coding`, `definition-of-done`, `incident-response`, `repo-onboarding`, `release-management`, plus `tracker-workflow` and `jira-integration`. They load when relevant and double as the team's written standards.
 
-**Roles (11)** - `spec-analyst`, `codebase-explorer`, `solution-architect`, `test-author`, `task-implementer`, `code-reviewer`, `security-auditor`, `debugger`, `qa-verifier`, `docs-scribe`, `release-manager`. On Claude Code they are subagents with least-privilege tools - the reviewers cannot write, the test author cannot touch production code. On Codex they are reference roles you run as a separate `codex exec` pass.
+**Roles (11)** - `spec-analyst`, `codebase-explorer`, `solution-architect`, `test-author`, `task-implementer`, `code-reviewer`, `security-auditor`, `debugger`, `qa-verifier`, `docs-scribe`, `release-manager`. On Claude Code they have scoped tool lists and written role boundaries. Bash can still write files, and the test-only rule is an instruction, not filesystem enforcement. The Codex adapter ships portable reference roles; use them inline or in an authorized native subagent/separate pass. Configure sandbox permissions separately.
 
 **Tracker** - one procedure surface, two backends. **Local**: one markdown file per work item under `docs/tracker/`, driven by a zero-dependency Node CLI. Works today. **Jira**: the same procedures against Jira Cloud - REST calls, JQL cookbook, ADF payloads, field and state mapping, failure modes, and a five-phase rollout. Documented, **not yet run against a live instance**.
 
-**Guardrails** - on Claude Code, hooks that deny destructive shell commands (`rm -rf`, `push --force`, `reset --hard`, bare `git stash`, piped installers, `DROP TABLE`) and writes to `.env` and key material, all exiting 0 so a hook bug can never block you. On any tool, `templates/git-hooks/pre-commit` refuses commits carrying secrets, private keys or conflict markers - it binds humans too, which is why it is the layer that matters most.
+**Guardrails** - Claude hooks detect selected destructive shell commands and sensitive file writes. These are limited heuristics and fail open on internal errors. The optional git guard checks staged filenames and content for selected credentials, private keys, and conflict markers, including filenames with spaces. Install both files from `templates/git-hooks/` and activate them with `git config core.hooksPath .githooks`. Local hooks can be disabled or bypassed; use sandbox permissions and server-side checks for enforcement. This release does not configure Codex-native hooks.
 
 **Templates** - `AGENTS.md` project memory (with a `CLAUDE.md` pointer so there is one file, not two), permissions/settings, PR template, CI quality gates, spec/ADR/tracker scaffolding.
 
@@ -104,6 +123,7 @@ Adapters are generated **and committed**, so installing needs no build step - an
 
 ```bash
 node scripts/build.mjs && node scripts/validate-kit.mjs
+node --test scripts/test-kit.mjs
 ```
 
 Edit `src/`, never `adapters/`. [docs/AUTHORING.md](docs/AUTHORING.md) covers when to reach for a skill versus a role versus a procedure versus a hook, the frontmatter contract for each, the build tokens, and the writing rules that keep these files as prompts rather than essays.
@@ -113,13 +133,15 @@ Edit `src/`, never `adapters/`. [docs/AUTHORING.md](docs/AUTHORING.md) covers wh
 | Piece | State |
 | --- | --- |
 | Skills, roles, procedures, templates, docs | Written and validated |
-| Claude Code adapter | Generated; format matches Claude Code's plugin layout |
-| Codex adapter | Generated; format derived from an installed Codex build's on-disk layout, **not yet loaded by a live Codex install** |
+| Claude Code adapter | Generated with strict YAML-compatible metadata; client checks recorded in [release validation](docs/RELEASE_VALIDATION.md) |
+| Codex adapter | Generated plugin manifests and documented `.agents/skills` vendoring; client checks recorded in [release validation](docs/RELEASE_VALIDATION.md) |
 | Local tracker CLI | Exercised end to end, including error paths |
-| Git pre-commit guard | Exercised against eight commit scenarios |
-| Claude Code hooks | Exercised against thirteen sample payloads |
+| Git pre-commit guard | Regression tests cover staged content, spaced/Unicode filenames, removed working copies, credentials, and actual rejected commits |
+| Claude Code hooks | Command variants tested as inert payloads; no destructive commands executed |
 | Jira backend | Documented design with a phased rollout; **never run against a live instance** |
 
 ## License
 
-MIT - see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE). Bundled plugins and vendored installations retain the notice.
+
+Contributions: [CONTRIBUTING.md](CONTRIBUTING.md). Security reports and guard limitations: [SECURITY.md](SECURITY.md).

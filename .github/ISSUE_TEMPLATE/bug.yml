@@ -1,0 +1,27 @@
+name: Bug report
+description: Report a reproducible problem in the kit.
+body:
+  - type: markdown
+    attributes:
+      value: "For vulnerabilities, use the private reporting link in SECURITY.md. Do not include real credentials or private project data."
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Kit version, client/version, operating system, Node version and installation method.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal steps or commands in a disposable project.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+      description: Include relevant redacted output.
+    validations:
+      required: true

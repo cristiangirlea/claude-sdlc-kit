@@ -1,6 +1,6 @@
 ---
-name: testing-strategy
-description: How to decide what kind of test to write and where - the unit/integration/e2e split, what deserves a test at all, fixture and test-data conventions, handling flakes, and what coverage does and does not tell you. Use when planning a slice's test strategy, when a test is hard to write, when tests are slow or flaky, or when reviewing whether a diff's tests are adequate.
+name: "testing-strategy"
+description: "How to decide what kind of test to write and where - the unit/integration/e2e split, what deserves a test at all, fixture and test-data conventions, handling flakes, and what coverage does and does not tell you. Use when planning a slice's test strategy, when a test is hard to write, when tests are slow or flaky, or when reviewing whether a diff's tests are adequate."
 ---
 
 <!-- Generated from src/skills/testing-strategy/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

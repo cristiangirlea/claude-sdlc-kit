@@ -1,7 +1,7 @@
 ---
-description: Configure the issue-tracker backend for this repository
+description: "Configure the issue-tracker backend for this repository"
 argument-hint: "[local | jira]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit"]
 ---
 
 <!-- Generated from src/commands/tracker/setup.md by scripts/build.mjs. Edit the source, not this file. -->

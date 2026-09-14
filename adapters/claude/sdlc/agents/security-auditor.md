@@ -1,9 +1,9 @@
 ---
-name: security-auditor
-description: Audits changed code for exploitable security defects - authn/authz gaps, injection, secret handling, unsafe deserialization, SSRF, insecure defaults and dependency risk - and reports each with an attack path. Use before shipping anything that touches authentication, authorization, user input, file handling, outbound requests, or third-party data. Defensive review only.\n\n<example>\nContext: A new public endpoint was added.\nuser: "The import-by-URL endpoint is done."\nassistant: "That fetches a user-supplied URL server-side - I will run the `security-auditor` agent over it before it goes near a PR."\n</example>
-tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
-model: inherit
-color: red
+name: "security-auditor"
+description: "Audits changed code for exploitable security defects - authn/authz gaps, injection, secret handling, unsafe deserialization, SSRF, insecure defaults and dependency risk - and reports each with an attack path. Use before shipping anything that touches authentication, authorization, user input, file handling, outbound requests, or third-party data. Defensive review only."
+tools: "Read, Grep, Glob, Bash, WebFetch, WebSearch"
+model: "inherit"
+color: "red"
 ---
 
 <!-- Generated from src/agents/security-auditor.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -52,3 +52,11 @@ Fix: <specific change>
 ## Trust boundaries reviewed
 ## Checked and clean
 ```
+
+## Examples
+
+<example>
+Context: A new public endpoint was added.
+user: "The import-by-URL endpoint is done."
+assistant: "That fetches a user-supplied URL server-side - I will run the `security-auditor` agent over it before it goes near a PR."
+</example>

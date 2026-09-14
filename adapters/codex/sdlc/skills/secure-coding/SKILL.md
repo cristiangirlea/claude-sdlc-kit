@@ -1,6 +1,6 @@
 ---
-name: secure-coding
-description: Defensive security practices to apply while writing code and to check while reviewing it - trust boundaries, authn/authz, input validation, injection sinks, secret handling, SSRF, safe defaults, dependency hygiene and LLM-specific risks. Use when writing or reviewing code that handles user input, authentication, authorization, files, outbound requests, payments or personal data.
+name: "secure-coding"
+description: "Defensive security practices to apply while writing code and to check while reviewing it - trust boundaries, authn/authz, input validation, injection sinks, secret handling, SSRF, safe defaults, dependency hygiene and LLM-specific risks. Use when writing or reviewing code that handles user input, authentication, authorization, files, outbound requests, payments or personal data."
 ---
 
 <!-- Generated from src/skills/secure-coding/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

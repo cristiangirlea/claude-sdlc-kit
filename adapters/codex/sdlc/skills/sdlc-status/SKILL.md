@@ -1,6 +1,6 @@
 ---
-name: sdlc-status
-description: Show where this work stands in the SDLC loop and what the next action is. Use when the user asks for the sdlc "status" step by name, or reaches that stage of the SDLC loop.
+name: "sdlc-status"
+description: "Show where this work stands in the SDLC loop and what the next action is. Use when the user asks for the sdlc \"status\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/sdlc/status.md by scripts/build.mjs. Edit the source, not this file. -->

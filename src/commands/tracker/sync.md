@@ -1,5 +1,5 @@
 ---
-description: Push the repository's state - branch, PR, status - back onto the work item
+description: "Push the repository's state - branch, PR, status - back onto the work item"
 argument-hint: "[optional: item id; defaults to the id in the branch name]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 ---

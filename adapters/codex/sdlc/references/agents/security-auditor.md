@@ -4,7 +4,7 @@
 
 **When to use:** Audits changed code for exploitable security defects - authn/authz gaps, injection, secret handling, unsafe deserialization, SSRF, insecure defaults and dependency risk - and reports each with an attack path. Use before shipping anything that touches authentication, authorization, user input, file handling, outbound requests, or third-party data. Defensive review only.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash, WebFetch, WebSearch
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash, WebFetch, WebSearch
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -54,3 +54,11 @@ Fix: <specific change>
 ## Trust boundaries reviewed
 ## Checked and clean
 ```
+
+## Examples
+
+<example>
+Context: A new public endpoint was added.
+user: "The import-by-URL endpoint is done."
+assistant: "That fetches a user-supplied URL server-side - I will run the `security-auditor` role (../../references/agents/security-auditor.md, relative to this skill) over it before it goes near a PR."
+</example>

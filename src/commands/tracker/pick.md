@@ -1,5 +1,5 @@
 ---
-description: Show what to work on next, or capture a new work item
+description: "Show what to work on next, or capture a new work item"
 argument-hint: "[optional: a title to capture instead of picking]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 ---

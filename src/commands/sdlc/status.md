@@ -1,5 +1,5 @@
 ---
-description: Show where this work stands in the SDLC loop and what the next action is
+description: "Show where this work stands in the SDLC loop and what the next action is"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 

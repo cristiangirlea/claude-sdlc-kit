@@ -1,6 +1,6 @@
 ---
-name: code-review-standards
-description: What to look for in a diff and how to report it - the hunting order from correctness to convention, the blocker/major/minor severity rubric, the requirement that every finding carries a concrete failure scenario, and how to give and receive review feedback. Use when reviewing a diff or a PR, when triaging review findings, or when deciding whether a change is safe to merge.
+name: "code-review-standards"
+description: "What to look for in a diff and how to report it - the hunting order from correctness to convention, the blocker/major/minor severity rubric, the requirement that every finding carries a concrete failure scenario, and how to give and receive review feedback. Use when reviewing a diff or a PR, when triaging review findings, or when deciding whether a change is safe to merge."
 ---
 
 <!-- Generated from src/skills/code-review-standards/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

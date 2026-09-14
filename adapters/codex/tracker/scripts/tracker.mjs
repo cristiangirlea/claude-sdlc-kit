@@ -26,7 +26,8 @@ import {
   readdirSync,
   writeFileSync,
 } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const STATUSES = [
   "backlog",
@@ -38,7 +39,21 @@ const STATUSES = [
 ];
 const TYPES = ["feature", "bug", "chore", "spike"];
 
-const ROOT = process.cwd();
+const cliArgs = process.argv.slice(2);
+const rootIndex = cliArgs.indexOf("--root");
+let projectRoot = process.cwd();
+if (rootIndex !== -1) {
+  const value = cliArgs[rootIndex + 1];
+  if (!value || value.startsWith("--")) fail("--root needs a project directory");
+  projectRoot = resolve(value);
+  cliArgs.splice(rootIndex, 2);
+}
+const ROOT = resolve(projectRoot);
+if (!existsSync(ROOT)) fail("project root does not exist");
+const resourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+if (ROOT === resourceRoot && (existsSync(join(ROOT, ".codex-plugin")) || existsSync(join(ROOT, ".claude-plugin")))) {
+  fail("run from your project directory, or pass --root <project>; do not store issues in the plugin");
+}
 
 function loadConfig() {
   const defaults = { backend: "local", prefix: "TASK", dir: "docs/tracker" };
@@ -337,7 +352,7 @@ function cmdNext() {
 
 // --- entry ------------------------------------------------------------------
 
-const [cmd, ...args] = process.argv.slice(2);
+const [cmd, ...args] = cliArgs;
 const commands = {
   list: cmdList,
   show: cmdShow,
@@ -349,10 +364,11 @@ const commands = {
   next: cmdNext,
 };
 
-if (!cmd || cmd === "--help" || cmd === "-h" || !commands[cmd]) {
+if (!cmd || cmd === "--help" || cmd === "-h" || !Object.hasOwn(commands, cmd)) {
   process.stdout.write(
     [
       "tracker - local file-backed issue tracker",
+      "Global option: --root <project-directory> (default: current directory)",
       "",
       "  list [--status <s>] [--type <t>] [--json]",
       "  show <id>",
@@ -367,7 +383,7 @@ if (!cmd || cmd === "--help" || cmd === "-h" || !commands[cmd]) {
       "",
     ].join("\n")
   );
-  process.exit(cmd && !commands[cmd] ? 1 : 0);
+  process.exit(cmd && cmd !== "--help" && cmd !== "-h" && !Object.hasOwn(commands, cmd) ? 1 : 0);
 }
 
 commands[cmd](args);

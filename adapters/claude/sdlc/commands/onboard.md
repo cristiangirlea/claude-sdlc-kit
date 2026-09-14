@@ -1,7 +1,7 @@
 ---
-description: Adopt this kit in the current repository - discover commands, write CLAUDE.md, set permissions and hooks
+description: "Adopt this kit in the current repository - discover commands, write CLAUDE.md, set permissions and hooks"
 argument-hint: "[optional: area to focus on]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "Task"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit","Task"]
 ---
 
 <!-- Generated from src/commands/sdlc/onboard.md by scripts/build.mjs. Edit the source, not this file. -->

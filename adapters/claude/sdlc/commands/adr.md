@@ -1,7 +1,7 @@
 ---
-description: Record an architecture decision - context, options, decision, consequences
+description: "Record an architecture decision - context, options, decision, consequences"
 argument-hint: "[the decision, or the question to be decided]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit"]
 ---
 
 <!-- Generated from src/commands/sdlc/adr.md by scripts/build.mjs. Edit the source, not this file. -->

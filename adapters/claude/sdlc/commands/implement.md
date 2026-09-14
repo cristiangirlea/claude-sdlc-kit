@@ -1,7 +1,7 @@
 ---
-description: Implement a slice from the plan, test-first, leaving the repo green
+description: "Implement a slice from the plan, test-first, leaving the repo green"
 argument-hint: "[slice number or description; defaults to the next unfinished slice]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "Task", "TodoWrite"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit","Task","TodoWrite"]
 ---
 
 <!-- Generated from src/commands/sdlc/implement.md by scripts/build.mjs. Edit the source, not this file. -->

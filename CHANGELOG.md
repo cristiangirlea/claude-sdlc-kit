@@ -4,13 +4,24 @@ All notable changes to this kit are recorded here, in [Keep a Changelog](https:/
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-14
+
+- Fixed invalid agent YAML; source and generated frontmatter now use a strictly validated YAML-compatible subset with JSON-quoted values.
+- Fixed builds in paths containing spaces and preserved unrelated `.agents` configuration during regeneration.
+- Shared the Bash/PowerShell installer implementation, installed Codex skills in `.agents/skills`, and corrected tracker resource paths and project-root handling.
+- Replaced the git guard's whitespace-splitting loop with a Node scanner of NUL-delimited staged paths and index blobs. Expanded credential and `.env` patterns.
+- Covered common destructive-command flag variants, fixed tracker help exit codes, and included license notices in installed bundles.
+- Added cross-platform behavioral CI and release-validation notes. Corrected claims about role permissions and current Codex features.
+
+Jira remains an unverified design. Local hooks remain limited, bypassable checks.
+
 ## [0.2.0] - 2026-09-11
 
 Restructured so one copy of the content ships to more than one agent.
 
 ### Added
 
-- **Codex adapter.** The same skills, procedures and roles rendered for Codex: skills keep the identical `SKILL.md` contract, procedures become `<plugin>-<name>` skills (Codex has no slash commands), and roles become `references/agents/*.md` to run as a separate `codex exec` pass (Codex has no subagent dispatch).
+- **Codex adapter.** The same skills, procedures and roles rendered for Codex: skills keep the identical `SKILL.md` contract, procedures become `<plugin>-<name>` skills (the adapter's chosen procedure surface), and roles become `references/agents/*.md` to run as a separate `codex exec` pass (portable reference roles; native Codex subagents are also available).
 - **`templates/git-hooks/pre-commit`** - refuses commits carrying `.env` files, private keys, credential files, high-confidence credential patterns, or conflict markers. Tool-agnostic by design: it binds humans and every agent, which is the right home for a rule this absolute. Exercised against eight commit scenarios.
 - **`scripts/build.mjs`** - renders `adapters/<tool>/` from `src/`, with `--check` to fail when they have drifted.
 - **`AGENTS.md`** as the project-memory template, with `CLAUDE.md` reduced to a one-line pointer at it - one file of memory, read by every tool.

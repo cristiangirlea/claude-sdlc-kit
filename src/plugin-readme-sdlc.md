@@ -29,16 +29,14 @@ Each of these is a skill: describe the step you want and it fires.
 <!-- if:claude -->
 ## Agents
 
-Dispatched into their own context window, each with least-privilege tools.
+Dispatched into their own context window with scoped tool lists. The writes column describes role instructions; Bash access and unrestricted file tools are not path-level enforcement.
 
 | Agent | Role | Writes? |
 <!-- endif -->
 <!-- if:codex -->
 ## Roles
 
-Codex has no subagent dispatch, so these live in `references/agents/`. Run one
-as its own `codex exec` pass when a clean context matters; otherwise adopt its
-rules inline. The "writes" column is a rule to follow, not a gate that is
+This adapter keeps portable roles in `references/agents/`. Use a role in an authorized native subagent or separate pass when a clean context matters; otherwise adopt its rules inline. The "writes" column is a rule to follow, not a gate that is
 enforced for you.
 
 | Role | Job | Writes? |
@@ -71,27 +69,22 @@ Loaded automatically when relevant; readable on their own as the team's written 
 | `protect-sensitive-files.mjs` | PreToolUse(Write/Edit) | Denies writes to `.env`, private keys, credential files |
 | `session-context.mjs` | SessionStart | Prints branch, derived work item, spec/plan status |
 
-All three exit 0 in every case; a bug in a hook can never block your work.
+The scripts exit 0 and return denials in JSON. They fail open on internal errors; missing Node or a timeout can still produce a client hook error. These checks are not a complete security boundary.
 
-The kit also ships `templates/git-hooks/pre-commit`, which refuses commits
-carrying secrets or key material. Install it as well: it binds humans and other
-tools, not just this session.
+The kit also ships a launcher and Node scanner in `templates/git-hooks/`. Once enabled, they check selected staged filename/content patterns for every normal git commit, including commits from other tools. Hooks can be bypassed.
 <!-- endif -->
 <!-- if:codex -->
-Codex has no per-tool-call hook, so enforcement lives in two places that do not
-depend on which agent is running:
+Codex supports native hooks, but this release does not install them. Configure the sandbox and optional git check separately:
 
 | Layer | Covers |
 | --- | --- |
 | `~/.codex/config.toml` | Sandbox mode and approval policy - what may run and what needs a human |
 | `templates/git-hooks/pre-commit` | Refuses commits carrying `.env` files, private keys, credential files, or conflict markers |
 
-Install the git hook: `git config core.hooksPath .githooks`. Being a git hook,
-it binds every agent and every human - which is the right home for a rule this
-absolute.
+Copy both files from `templates/git-hooks/` into `.githooks/` and enable them with `git config core.hooksPath .githooks`. The local check can be bypassed; it does not replace sandbox or server-side enforcement.
 <!-- endif -->
 
 ## Requirements
 
-Node.js 18+ for the tracker CLI and (on Claude Code) the hooks. The workflow
+Node.js 22+ for the tracker CLI and (on Claude Code) the hooks. The workflow
 itself needs nothing.

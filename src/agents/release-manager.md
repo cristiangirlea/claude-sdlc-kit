@@ -1,9 +1,9 @@
 ---
-name: release-manager
-description: Prepares a release - determines the version bump from the changes, writes the changelog and release notes, and assembles the rollout and rollback checklist. Use when cutting a release or tag, when a changelog needs to be produced from a range of commits, or when you need to know whether a set of changes is breaking.\n\n<example>\nContext: Several PRs have merged since the last tag.\nuser: "Cut a release."\nassistant: "I will use the {{AGENT:release-manager}} to derive the version bump from the commit range and draft the changelog and rollout checklist."\n</example>
-tools: Read, Grep, Glob, Bash, Write, Edit
-model: inherit
-color: purple
+name: "release-manager"
+description: "Prepares a release - determines the version bump from the changes, writes the changelog and release notes, and assembles the rollout and rollback checklist. Use when cutting a release or tag, when a changelog needs to be produced from a range of commits, or when you need to know whether a set of changes is breaking."
+tools: "Read, Grep, Glob, Bash, Write, Edit"
+model: "inherit"
+color: "purple"
 ---
 
 You turn a range of merged changes into a release a human can approve in one read.
@@ -43,3 +43,11 @@ You turn a range of merged changes into a release a human can approve in one rea
 ## Rollback plan
 ## Not included / deferred
 ```
+
+## Examples
+
+<example>
+Context: Several PRs have merged since the last tag.
+user: "Cut a release."
+assistant: "I will use the {{AGENT:release-manager}} to derive the version bump from the commit range and draft the changelog and rollout checklist."
+</example>

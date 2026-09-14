@@ -1,6 +1,6 @@
 ---
-name: git-workflow
-description: Branch, commit and pull-request conventions for this kit - trunk-based branching, tracker-id naming, Conventional Commits, atomic commit discipline, PR bodies that state what was verified, and the git operations that must never be automated. Use when creating a branch, staging and writing commits, opening or updating a PR, or cleaning up history before review.
+name: "git-workflow"
+description: "Branch, commit and pull-request conventions for this kit - trunk-based branching, tracker-id naming, Conventional Commits, atomic commit discipline, PR bodies that state what was verified, and the git operations that must never be automated. Use when creating a branch, staging and writing commits, opening or updating a PR, or cleaning up history before review."
 ---
 
 # Git workflow

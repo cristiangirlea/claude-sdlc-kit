@@ -1,6 +1,6 @@
 ---
-name: task-decomposition
-description: How to break an approved spec into vertical slices and tasks that each leave the repository green, name their own verification, and can be parallelised safely across agents. Use when turning a plan into a task list, when a piece of work feels too big to start, when work has stalled halfway through a large change, or when deciding what can run in parallel.
+name: "task-decomposition"
+description: "How to break an approved spec into vertical slices and tasks that each leave the repository green, name their own verification, and can be parallelised safely across agents. Use when turning a plan into a task list, when a piece of work feels too big to start, when work has stalled halfway through a large change, or when deciding what can run in parallel."
 ---
 
 <!-- Generated from src/skills/task-decomposition/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

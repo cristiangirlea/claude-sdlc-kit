@@ -1,6 +1,6 @@
 ---
-name: jira-integration
-description: How to wire this kit's tracker commands to Jira - choosing between the Atlassian MCP server, the REST API and the CLI, configuring project and field mapping, JQL for the queries the workflow needs, and the safety rules for writes to a shared tracker. Use when setting up Jira for a project, mapping SDLC states to a Jira workflow, querying issues, or transitioning and commenting on issues from a session.
+name: "jira-integration"
+description: "How to wire this kit's tracker commands to Jira - choosing between the Atlassian MCP server, the REST API and the CLI, configuring project and field mapping, JQL for the queries the workflow needs, and the safety rules for writes to a shared tracker. Use when setting up Jira for a project, mapping SDLC states to a Jira workflow, querying issues, or transitioning and commenting on issues from a session."
 ---
 
 <!-- Generated from src/skills/jira-integration/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

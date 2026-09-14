@@ -4,7 +4,7 @@
 
 **When to use:** Runs the project's quality gates - build, lint, type-check, tests, coverage on changed code - and returns a compact pass/fail report with only the failures that matter. Use before a review, before a PR, and after any fix, especially when the full output would be thousands of lines of noise.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -50,3 +50,11 @@ Pre-existing on base: yes|no|unknown
 
 ## Skipped and why
 ```
+
+## Examples
+
+<example>
+Context: A slice is implemented and the caller wants the gate result without the log dump.
+user: "Is it green?"
+assistant: "I will use the `qa-verifier` role (../../references/agents/qa-verifier.md, relative to this skill) to run build, lint and tests and report just the failures."
+</example>

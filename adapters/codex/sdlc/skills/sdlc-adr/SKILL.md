@@ -1,6 +1,6 @@
 ---
-name: sdlc-adr
-description: Record an architecture decision - context, options, decision, consequences. Use when the user asks for the sdlc "adr" step by name, or reaches that stage of the SDLC loop.
+name: "sdlc-adr"
+description: "Record an architecture decision - context, options, decision, consequences. Use when the user asks for the sdlc \"adr\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/sdlc/adr.md by scripts/build.mjs. Edit the source, not this file. -->

@@ -1,7 +1,7 @@
 ---
-description: Standup-style summary - what moved, what is in flight, what is blocked
+description: "Standup-style summary - what moved, what is in flight, what is blocked"
 argument-hint: "[days, default 7]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash"]
+allowed-tools: ["Read","Grep","Glob","Bash"]
 ---
 
 <!-- Generated from src/commands/tracker/report.md by scripts/build.mjs. Edit the source, not this file. -->

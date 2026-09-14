@@ -4,7 +4,7 @@
 
 **When to use:** Reviews a diff for correctness bugs, silent failures, missing tests, and convention drift, and reports findings ranked by severity with a concrete failure scenario for each. Use after finishing a chunk of work, before opening a pull request, and whenever a change touches money, auth, data migration or concurrency.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -52,3 +52,11 @@ Fix: <the change you would make>
 
 ## What I checked and found clean
 ```
+
+## Examples
+
+<example>
+Context: A feature branch is ready for a PR.
+user: "I have finished the saved-search endpoints."
+assistant: "Before the PR I will run the `code-reviewer` role (../../references/agents/code-reviewer.md, relative to this skill) over the branch diff."
+</example>

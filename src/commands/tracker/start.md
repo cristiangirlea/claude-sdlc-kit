@@ -1,5 +1,5 @@
 ---
-description: Start a work item - move it to in-progress and create the linked branch
+description: "Start a work item - move it to in-progress and create the linked branch"
 argument-hint: "<item id>"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 ---

@@ -1,9 +1,14 @@
 ---
-name: tracker-start
-description: Start a work item - move it to in-progress and create the linked branch. Use when the user asks for the tracker "start" step by name, or reaches that stage of the SDLC loop.
+name: "tracker-start"
+description: "Start a work item - move it to in-progress and create the linked branch. Use when the user asks for the tracker \"start\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/tracker/start.md by scripts/build.mjs. Edit the source, not this file. -->
+
+## Runtime paths
+
+Resolve [the tracker CLI](../../scripts/tracker.mjs) relative to this SKILL.md. Replace `<absolute plugin resource root>` in commands with the absolute directory containing that `scripts/` folder. Keep the working directory at the user's project root; never change into the plugin to run the tracker. Use `--root "<absolute project root>"` when running from elsewhere.
+
 
 # Start work
 

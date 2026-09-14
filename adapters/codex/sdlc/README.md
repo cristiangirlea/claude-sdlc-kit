@@ -23,9 +23,7 @@ Each of these is a skill: describe the step you want and it fires.
 
 ## Roles
 
-Codex has no subagent dispatch, so these live in `references/agents/`. Run one
-as its own `codex exec` pass when a clean context matters; otherwise adopt its
-rules inline. The "writes" column is a rule to follow, not a gate that is
+This adapter keeps portable roles in `references/agents/`. Use a role in an authorized native subagent or separate pass when a clean context matters; otherwise adopt its rules inline. The "writes" column is a rule to follow, not a gate that is
 enforced for you.
 
 | Role | Job | Writes? |
@@ -50,19 +48,16 @@ Loaded automatically when relevant; readable on their own as the team's written 
 
 ## Guardrails
 
-Codex has no per-tool-call hook, so enforcement lives in two places that do not
-depend on which agent is running:
+Codex supports native hooks, but this release does not install them. Configure the sandbox and optional git check separately:
 
 | Layer | Covers |
 | --- | --- |
 | `~/.codex/config.toml` | Sandbox mode and approval policy - what may run and what needs a human |
 | `templates/git-hooks/pre-commit` | Refuses commits carrying `.env` files, private keys, credential files, or conflict markers |
 
-Install the git hook: `git config core.hooksPath .githooks`. Being a git hook,
-it binds every agent and every human - which is the right home for a rule this
-absolute.
+Copy both files from `templates/git-hooks/` into `.githooks/` and enable them with `git config core.hooksPath .githooks`. The local check can be bypassed; it does not replace sandbox or server-side enforcement.
 
 ## Requirements
 
-Node.js 18+ for the tracker CLI and (on Claude Code) the hooks. The workflow
+Node.js 22+ for the tracker CLI and (on Claude Code) the hooks. The workflow
 itself needs nothing.

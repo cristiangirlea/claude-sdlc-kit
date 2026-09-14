@@ -1,6 +1,6 @@
 ---
-name: tdd-workflow
-description: The red-green-refactor discipline this kit implements - write the failing test, observe it fail for the right reason, write the minimum code to pass, then refactor under a green suite. Use when implementing a slice, fixing a bug, or any time you are about to write production code, and when deciding whether a test is real evidence or theatre.
+name: "tdd-workflow"
+description: "The red-green-refactor discipline this kit implements - write the failing test, observe it fail for the right reason, write the minimum code to pass, then refactor under a green suite. Use when implementing a slice, fixing a bug, or any time you are about to write production code, and when deciding whether a test is real evidence or theatre."
 ---
 
 # TDD loop

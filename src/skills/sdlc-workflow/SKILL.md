@@ -1,6 +1,6 @@
 ---
-name: sdlc-workflow
-description: The end-to-end development loop this kit enforces - intake, spec, plan, implement, review, verify, ship, learn - including which stage gate must pass before the next stage starts, which agent owns each stage, and where the artefacts live. Use when starting any non-trivial piece of work, when you are unsure which stage you are in or what to do next, when a request arrives with no ticket or spec, or when deciding whether something is ready to merge or ship.
+name: "sdlc-workflow"
+description: "The end-to-end development loop this kit enforces - intake, spec, plan, implement, review, verify, ship, learn - including which stage gate must pass before the next stage starts, which agent owns each stage, and where the artefacts live. Use when starting any non-trivial piece of work, when you are unsure which stage you are in or what to do next, when a request arrives with no ticket or spec, or when deciding whether something is ready to merge or ship."
 ---
 
 # SDLC workflow

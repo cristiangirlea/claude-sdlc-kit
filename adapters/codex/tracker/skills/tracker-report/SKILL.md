@@ -1,9 +1,14 @@
 ---
-name: tracker-report
-description: Standup-style summary - what moved, what is in flight, what is blocked. Use when the user asks for the tracker "report" step by name, or reaches that stage of the SDLC loop.
+name: "tracker-report"
+description: "Standup-style summary - what moved, what is in flight, what is blocked. Use when the user asks for the tracker \"report\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/tracker/report.md by scripts/build.mjs. Edit the source, not this file. -->
+
+## Runtime paths
+
+Resolve [the tracker CLI](../../scripts/tracker.mjs) relative to this SKILL.md. Replace `<absolute plugin resource root>` in commands with the absolute directory containing that `scripts/` folder. Keep the working directory at the user's project root; never change into the plugin to run the tracker. Use `--root "<absolute project root>"` when running from elsewhere.
+
 
 # Report
 
@@ -12,7 +17,7 @@ description: Standup-style summary - what moved, what is in flight, what is bloc
 Read-only. This command never writes to the tracker.
 
 1. **Pull the tracker view.**
-   - local: `node "./scripts/tracker.mjs" report --days <n>`
+   - local: `node "<absolute plugin resource root>/scripts/tracker.mjs" report --days <n>`
    - jira: `project=PROJ AND updated >= -<n>d ORDER BY updated DESC`, plus `statusCategory=Done AND resolutiondate >= -<n>d` for what closed.
 2. **Cross-check against git**, because the tracker is a claim and the repo is the evidence: `git log --oneline --since="<n> days ago"`, merged branches, open PRs (`gh pr list` if available).
 3. **Report in this shape:**

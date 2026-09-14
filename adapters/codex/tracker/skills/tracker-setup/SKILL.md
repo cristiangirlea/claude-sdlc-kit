@@ -1,9 +1,14 @@
 ---
-name: tracker-setup
-description: Configure the issue-tracker backend for this repository. Use when the user asks for the tracker "setup" step by name, or reaches that stage of the SDLC loop.
+name: "tracker-setup"
+description: "Configure the issue-tracker backend for this repository. Use when the user asks for the tracker \"setup\" step by name, or reaches that stage of the SDLC loop."
 ---
 
 <!-- Generated from src/commands/tracker/setup.md by scripts/build.mjs. Edit the source, not this file. -->
+
+## Runtime paths
+
+Resolve [the tracker CLI](../../scripts/tracker.mjs) relative to this SKILL.md. Replace `<absolute plugin resource root>` in commands with the absolute directory containing that `scripts/` folder. Keep the working directory at the user's project root; never change into the plugin to run the tracker. Use `--root "<absolute project root>"` when running from elsewhere.
+
 
 # Set up the tracker
 
@@ -19,7 +24,7 @@ Follow `tracker-workflow`.
    ```
    Pick a prefix that matches the project (`JP`, `API`, `TASK`). It ends up in every branch name, so keep it short.
 2. Create `docs/tracker/` with a `README.md` explaining that each file is one work item and that the files are meant to be reviewed like code.
-3. Create one item to prove the loop works: `node "./scripts/tracker.mjs" new "Adopt the SDLC kit" --type chore --priority P3`.
+3. Create one item to prove the loop works: `node "<absolute plugin resource root>/scripts/tracker.mjs" new "Adopt the SDLC kit" --type chore --priority P3`.
 4. Show the user the file and the command list.
 
 ## jira

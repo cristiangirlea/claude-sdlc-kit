@@ -1,5 +1,5 @@
 ---
-description: Standup-style summary - what moved, what is in flight, what is blocked
+description: "Standup-style summary - what moved, what is in flight, what is blocked"
 argument-hint: "[days, default 7]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---

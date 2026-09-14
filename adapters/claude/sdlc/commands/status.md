@@ -1,6 +1,6 @@
 ---
-description: Show where this work stands in the SDLC loop and what the next action is
-allowed-tools: ["Read", "Grep", "Glob", "Bash"]
+description: "Show where this work stands in the SDLC loop and what the next action is"
+allowed-tools: ["Read","Grep","Glob","Bash"]
 ---
 
 <!-- Generated from src/commands/sdlc/status.md by scripts/build.mjs. Edit the source, not this file. -->

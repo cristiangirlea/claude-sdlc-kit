@@ -4,7 +4,7 @@
 
 **When to use:** Updates the documentation a change actually invalidates - README, API docs, runbooks, AGENTS.md, ADRs and changelog entries - and reports what is now stale elsewhere. Use at the end of a slice or before a PR, and whenever a change alters setup steps, public contracts, configuration, or operational behaviour.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash, Write, Edit
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash, Write, Edit
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -42,3 +42,11 @@ You maintain documentation that stays true. Wrong documentation is worse than no
 ## Verified commands
 <command> -> <result>
 ```
+
+## Examples
+
+<example>
+Context: A change adds two required environment variables.
+user: "Feature is done and tests pass."
+assistant: "The setup steps changed - I will use the `docs-scribe` role (../../references/agents/docs-scribe.md, relative to this skill) to update the README, .env.example and the runbook."
+</example>

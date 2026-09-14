@@ -1,6 +1,6 @@
 ---
-name: repo-onboarding
-description: How to adopt this kit in an existing repository and write the project memory it depends on - discovering the real build/test/lint commands, capturing conventions into AGENTS.md, setting permissions and guardrails in ~/.codex/config.toml, and creating the docs/ artefact layout. Use when starting work in an unfamiliar repository, when installing this kit into a project, or when AGENTS.md is missing, stale or bloated.
+name: "repo-onboarding"
+description: "How to adopt this kit in an existing repository and write the project memory it depends on - discovering the real build/test/lint commands, capturing conventions into AGENTS.md, setting permissions and guardrails in ~/.codex/config.toml, and creating the docs/ artefact layout. Use when starting work in an unfamiliar repository, when installing this kit into a project, or when AGENTS.md is missing, stale or bloated."
 ---
 
 <!-- Generated from src/skills/repo-onboarding/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -44,10 +44,10 @@ Template: `templates/AGENTS.md` in this kit. Claude Code reads `CLAUDE.md`, so `
 
 ## 3. Configure the guardrails
 
-Two layers, because Codex has no per-tool-call hook:
+This kit uses the sandbox plus an optional git check. Codex also supports native hooks; configure those separately if needed:
 
 - **`~/.codex/config.toml`** - sandbox mode and approval policy. Keep writes confined to the workspace and approvals on for anything that leaves it.
-- **`.git/hooks/pre-commit`** - install `templates/git-hooks/pre-commit` from this kit. It refuses commits that carry `.env` files, private keys or credential files. Being a git hook, it binds every agent and every human, which is the right place for a rule this absolute.
+- **`.githooks/`** - copy both files from `templates/git-hooks/` and enable them with `git config core.hooksPath .githooks`. This checks selected credential and conflict patterns in staged content. It can be bypassed and is not complete secret detection.
 
 Start restrictive. Loosen based on the prompts you actually hit, not on speculation.
 

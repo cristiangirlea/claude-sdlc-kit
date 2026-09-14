@@ -1,7 +1,7 @@
 ---
-description: Review the current diff for correctness, silent failures, security and test gaps
+description: "Review the current diff for correctness, silent failures, security and test gaps"
 argument-hint: "[diff target: empty for working tree, a branch, a commit range, or a PR number]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
+allowed-tools: ["Read","Grep","Glob","Bash","Task"]
 ---
 
 <!-- Generated from src/commands/sdlc/review.md by scripts/build.mjs. Edit the source, not this file. -->

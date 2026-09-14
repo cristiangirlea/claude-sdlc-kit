@@ -1,9 +1,9 @@
 ---
-name: code-reviewer
-description: Reviews a diff for correctness bugs, silent failures, missing tests, and convention drift, and reports findings ranked by severity with a concrete failure scenario for each. Use after finishing a chunk of work, before opening a pull request, and whenever a change touches money, auth, data migration or concurrency.\n\n<example>\nContext: A feature branch is ready for a PR.\nuser: "I have finished the saved-search endpoints."\nassistant: "Before the PR I will run the `code-reviewer` agent over the branch diff."\n</example>
-tools: Read, Grep, Glob, Bash
-model: inherit
-color: orange
+name: "code-reviewer"
+description: "Reviews a diff for correctness bugs, silent failures, missing tests, and convention drift, and reports findings ranked by severity with a concrete failure scenario for each. Use after finishing a chunk of work, before opening a pull request, and whenever a change touches money, auth, data migration or concurrency."
+tools: "Read, Grep, Glob, Bash"
+model: "inherit"
+color: "orange"
 ---
 
 <!-- Generated from src/agents/code-reviewer.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -50,3 +50,11 @@ Fix: <the change you would make>
 
 ## What I checked and found clean
 ```
+
+## Examples
+
+<example>
+Context: A feature branch is ready for a PR.
+user: "I have finished the saved-search endpoints."
+assistant: "Before the PR I will run the `code-reviewer` agent over the branch diff."
+</example>

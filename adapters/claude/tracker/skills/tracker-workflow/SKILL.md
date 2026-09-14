@@ -1,6 +1,6 @@
 ---
-name: tracker-workflow
-description: The backend-agnostic issue model this kit uses - work item states and their meaning, the id that ties tracker item to branch to commits to PR, what belongs in an item versus a spec, and the rules for keeping the tracker honest. Use when picking up work, creating or updating a work item, wiring a branch to an item, reporting status, or deciding which backend (local files or Jira) an action should hit.
+name: "tracker-workflow"
+description: "The backend-agnostic issue model this kit uses - work item states and their meaning, the id that ties tracker item to branch to commits to PR, what belongs in an item versus a spec, and the rules for keeping the tracker honest. Use when picking up work, creating or updating a work item, wiring a branch to an item, reporting status, or deciding which backend (local files or Jira) an action should hit."
 ---
 
 <!-- Generated from src/skills/tracker-workflow/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -80,12 +80,12 @@ docs/specs/SPEC-TASK-42-saved-searches.md  spec
 ## Local backend cheatsheet
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs list --status ready
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs new "Add saved searches" --type feature --priority P2
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs move TASK-42 in-progress
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs set TASK-42 branch=feat/TASK-42-saved-searches pr=123
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs comment TASK-42 "blocked on the auth decision"
-node ${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs report --days 7
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" list --status ready
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" new "Add saved searches" --type feature --priority P2
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" move TASK-42 in-progress
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" set TASK-42 branch=feat/TASK-42-saved-searches pr=123
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" comment TASK-42 "blocked on the auth decision"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.mjs" report --days 7
 ```
 
 (`${CLAUDE_PLUGIN_ROOT}` resolves to the installed plugin's directory. Vendored into a project it is `.claude/plugins/tracker`.)

@@ -1,7 +1,7 @@
 ---
-description: Prepare the change for merge - docs, commits, PR body, tracker update
+description: "Prepare the change for merge - docs, commits, PR body, tracker update"
 argument-hint: "[optional: PR title]"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "Task"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit","Task"]
 ---
 
 <!-- Generated from src/commands/sdlc/ship.md by scripts/build.mjs. Edit the source, not this file. -->

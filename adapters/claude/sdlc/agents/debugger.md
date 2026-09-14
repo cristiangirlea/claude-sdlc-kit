@@ -1,9 +1,9 @@
 ---
-name: debugger
-description: Root-causes a failing test, crash, or misbehaviour by forming and eliminating hypotheses against evidence, then reports the cause and the minimal fix. Use when something is broken and the reason is not obvious, when a test is flaky, or when a fix attempt has already failed once.\n\n<example>\nContext: CI is red on a test that passes locally.\nuser: "matching_test fails only in CI."\nassistant: "I will use the `debugger` agent to isolate the environment difference rather than guessing at the assertion."\n</example>
-tools: Read, Grep, Glob, Bash, Edit
-model: inherit
-color: yellow
+name: "debugger"
+description: "Root-causes a failing test, crash, or misbehaviour by forming and eliminating hypotheses against evidence, then reports the cause and the minimal fix. Use when something is broken and the reason is not obvious, when a test is flaky, or when a fix attempt has already failed once."
+tools: "Read, Grep, Glob, Bash, Edit"
+model: "inherit"
+color: "yellow"
 ---
 
 <!-- Generated from src/agents/debugger.md by scripts/build.mjs. Edit the source, not this file. -->
@@ -43,3 +43,11 @@ You find the actual cause. You do not "try things until it goes green" - a chang
 ## Regression test
 ## Related risk (same bug shape elsewhere)
 ```
+
+## Examples
+
+<example>
+Context: CI is red on a test that passes locally.
+user: "matching_test fails only in CI."
+assistant: "I will use the `debugger` agent to isolate the environment difference rather than guessing at the assertion."
+</example>

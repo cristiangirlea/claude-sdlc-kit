@@ -1,6 +1,6 @@
 ---
-name: spec-writing
-description: How to write a specification that is small enough to read and precise enough to build from - scope, non-goals, Given/When/Then acceptance criteria, edge-case enumeration, and open questions with recommended defaults. Use when turning a request or ticket into a spec, when reviewing someone else's spec, or when a request is too vague to implement safely.
+name: "spec-writing"
+description: "How to write a specification that is small enough to read and precise enough to build from - scope, non-goals, Given/When/Then acceptance criteria, edge-case enumeration, and open questions with recommended defaults. Use when turning a request or ticket into a spec, when reviewing someone else's spec, or when a request is too vague to implement safely."
 ---
 
 <!-- Generated from src/skills/spec-writing/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

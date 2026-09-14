@@ -1,7 +1,7 @@
 ---
-description: Add a note to a work item's log
+description: "Add a note to a work item's log"
 argument-hint: "<item id> <text>"
-allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+allowed-tools: ["Read","Grep","Glob","Bash","Write","Edit"]
 ---
 
 <!-- Generated from src/commands/tracker/comment.md by scripts/build.mjs. Edit the source, not this file. -->

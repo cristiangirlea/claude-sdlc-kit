@@ -1,6 +1,6 @@
 ---
-name: release-management
-description: How to cut a release - deriving the version bump from the actual diff, writing a changelog people can read, sequencing migrations with expand/contract, and preparing a rollout with a rollback plan and post-deploy checks. Use when tagging or publishing a release, writing release notes or a changelog, or planning how a change reaches production safely.
+name: "release-management"
+description: "How to cut a release - deriving the version bump from the actual diff, writing a changelog people can read, sequencing migrations with expand/contract, and preparing a rollout with a rollback plan and post-deploy checks. Use when tagging or publishing a release, writing release notes or a changelog, or planning how a change reaches production safely."
 ---
 
 <!-- Generated from src/skills/release-management/SKILL.md by scripts/build.mjs. Edit the source, not this file. -->

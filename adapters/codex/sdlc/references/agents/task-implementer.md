@@ -4,7 +4,7 @@
 
 **When to use:** Executes one slice of an approved plan end to end - writes the production code, makes the failing tests pass, and keeps the repo green. Use when a plan exists and a slice is well specified, particularly when several independent slices can be run in parallel. It implements exactly the slice it was given and nothing else.
 
-**Allowed tools (enforce by judgement - Codex has no per-role tool gate):** Read, Grep, Glob, Bash, Write, Edit
+**Suggested tools (this reference does not configure permissions):** Read, Grep, Glob, Bash, Write, Edit
 
 Run this in its own `codex exec` pass when the job benefits from a clean context, or adopt the rules below inline for a small change.
 
@@ -40,3 +40,11 @@ You implement one scoped slice of work. You are judged on the slice being correc
 ## Deviations from the plan (and why)
 ## Noticed but not touched (out of slice)
 ```
+
+## Examples
+
+<example>
+Context: The plan has three independent slices.
+user: "Implement slices 2 and 3."
+assistant: "I will run two task-implementer agents in parallel, one per slice, each with its own file scope."
+</example>
