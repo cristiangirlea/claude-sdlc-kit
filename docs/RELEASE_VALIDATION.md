@@ -1,10 +1,10 @@
 # Release validation: 0.3.0
 
-Recorded on 2026-09-15. Local validation and all 46 regression cases passed on Windows Node 22.16.0; both Claude package contracts passed. This extends the 0.2.1 compatibility checks below.
+Recorded on 2026-09-15. Local validation and all 47 regression cases passed on Windows Node 22.16.0; both Claude package contracts passed. This extends the 0.2.1 compatibility checks below.
 
 - Tracker regressions cover invalid priorities and report windows, protected IDs
   and timestamps, multiline metadata and migration of legacy plain/quoted text.
-- Upgrade regressions exercise both adapters, receipts, local conflicts, unknown
+- Upgrade regressions exercise both adapters, receipts, local conflicts, intentional deletions, unknown
   baselines, dry-run behavior and LF/CRLF changes. Bash and PowerShell wrappers
   accept the upgrade option.
 - The [runnable example](../examples/label-normalizer/README.md) records a feature

@@ -162,6 +162,11 @@ for (const tool of ["claude", "codex"]) {
     const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
     assert.equal(receipt.files[helper].version, "9.0.0");
     assert.equal(receipt.files[skill].version, JSON.parse(receiptBefore).files[skill].version);
+    unlinkSync(join(target, skill));
+    const deletedConflict = run([...cli, "--upgrade"]);
+    assert.equal(deletedConflict.status, 2);
+    assert.match(deletedConflict.stdout, /conflict deleted/);
+    assert.ok(!existsSync(join(target, skill)));
     // Restoring the original file makes it safe to upgrade on the next attempt.
     writeFileSync(join(target, skill), originalSkill);
     ok([...cli, "--upgrade"]);
@@ -288,4 +293,17 @@ test("installer rejects conflicting flags and receipt directories before writing
   mkdirSync(join(target, ".sdlc/install-codex.json"), { recursive: true });
   assert.equal(run([...cli, "--upgrade"]).status, 1);
   assert.ok(!existsSync(join(target, ".agents")));
+});
+
+test("upgrade preserves intentional deletions until explicitly forced", t => {
+  const target = fixture(t), cli = node("scripts/install.mjs", target, "--tool", "codex");
+  ok(cli);
+  const file = join(target, ".agents/skills/tracker-workflow/SKILL.md");
+  unlinkSync(file);
+  const result = run([...cli, "--upgrade"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /preserve deleted/);
+  assert.ok(!existsSync(file));
+  ok([...cli, "--force"]);
+  assert.ok(existsSync(file));
 });

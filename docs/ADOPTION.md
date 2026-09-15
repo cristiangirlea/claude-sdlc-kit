@@ -66,6 +66,8 @@ After obtaining the newer kit version, preview and apply with the same tool and
 
 - Untouched files are updated when the kit changes them. LF/CRLF conversion alone
   does not count as a local edit.
+- Locally deleted managed files stay deleted during upgrades. A newer upstream
+  version is reported as a conflict; `--force` explicitly restores selected files.
 - Local edits are preserved. If both your copy and the kit changed from the recorded
   baseline, the installer prints `conflict` and returns **2**. Other safe updates
   are still applied; a conflict does not roll them back. `--dry-run` writes nothing,

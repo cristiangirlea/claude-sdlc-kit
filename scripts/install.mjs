@@ -103,6 +103,13 @@ try {
     const incoming = digest(content);
     const current = existsSync(path) ? digest(readFileSync(path)) : null;
     const baseline = Object.hasOwn(receipt.files, dest) ? receipt.files[dest].sha256 : null;
+    if (upgrade && current === null && baseline !== null) {
+      const conflict = incoming !== baseline;
+      console.log(`${conflict ? "conflict" : "preserve"} deleted ${dest}`);
+      if (conflict) conflicts++;
+      skipped++;
+      continue;
+    }
     if (current === incoming) {
       receipt.files[dest] = { sha256: incoming, version };
       console.log(`unchanged ${dest}`);
