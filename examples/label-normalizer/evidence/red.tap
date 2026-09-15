@@ -1,0 +1,113 @@
+TAP version 13
+# Subtest: AC1 trims, lowercases and deduplicates labels in first-occurrence order
+not ok 1 - AC1 trims, lowercases and deduplicates labels in first-occurrence order
+  ---
+  duration_ms: 1.245
+  type: 'test'
+  location: '<project>\\label-normalizer.test.mjs:5:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+      [
+    +   ' Bug ',
+        'bug',
+    +   'URGENT',
+    -   'urgent',
+        'docs'
+      ]
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'bug'
+    1: 'urgent'
+    2: 'docs'
+  actual:
+    0: ' Bug '
+    1: 'bug'
+    2: 'URGENT'
+    3: 'docs'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (<project>/label-normalizer.test.mjs:6:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: AC2 drops blank labels and accepts an empty list
+not ok 2 - AC2 drops blank labels and accepts an empty list
+  ---
+  duration_ms: 0.388
+  type: 'test'
+  location: '<project>\\label-normalizer.test.mjs:9:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+      [
+    +   '',
+    +   ' \t',
+    +   ' docs ',
+    +   '\n'
+    -   'docs'
+      ]
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'docs'
+  actual:
+    0: ''
+    1: ' \t'
+    2: ' docs '
+    3: |-
+
+
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (<project>/label-normalizer.test.mjs:10:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: AC3 preserves the input array
+ok 3 - AC3 preserves the input array
+  ---
+  duration_ms: 0.1972
+  type: 'test'
+  ...
+# Subtest: AC4 rejects non-array inputs and non-string elements
+not ok 4 - AC4 rejects non-array inputs and non-string elements
+  ---
+  duration_ms: 0.1746
+  type: 'test'
+  location: '<project>\\label-normalizer.test.mjs:20:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception (TypeError).'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (<project>/label-normalizer.test.mjs:22:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 112.8995

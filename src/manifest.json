@@ -1,6 +1,6 @@
 {
   "$comment": "Single source of truth for what goes into each plugin. scripts/build.mjs renders adapters/<tool>/ from src/ using this. Never edit adapters/ by hand.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "marketplace": {
     "name": "sdlc-kit",
     "displayName": "SDLC Kit",

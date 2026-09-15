@@ -71,10 +71,11 @@ The target directory must already exist. Then run either installer:
 .\scripts\install.ps1 -Target C:\src\my-repo -Tool claude -Templates
 ```
 
-Files land in the target repo; review and commit them so the team gets them with a pull. Codex discovers the installed skills under `.agents/skills/`; Claude uses `.claude/`. `--dry-run` previews; existing files are skipped unless `--force`. Upgrade existing installations by reviewing and merging skipped files, or deliberately replacing them with `--force`. Run vendored Claude tracker commands from the project root. The tracker CLI also accepts `--root "<project directory>"`.
+Files land in the target repo; review and commit them so the team gets them with a pull. Codex discovers the installed skills under `.agents/skills/`; Claude uses `.claude/`. `--dry-run` previews; existing files are skipped unless `--force`. New installations record per-file versions and hashes. Use `--upgrade --dry-run` to preview updates; `--upgrade` updates untouched files and preserves local edits. Conflicts return exit code 2. See [upgrade and conflict handling](docs/ADOPTION.md#upgrading-vendored-installations). Run vendored Claude tracker commands from the project root. The tracker CLI also accepts `--root "<project directory>"`.
 
 Full instructions and a staged team rollout: [docs/ADOPTION.md](docs/ADOPTION.md).
 A worked example of one feature going through the loop: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
+A runnable feature with recorded red/green evidence: [label normalizer](examples/label-normalizer/README.md). Run `node scripts/demo-workflow.mjs --tool codex` (or `claude`) to replay it in a temporary project.
 
 ## The loop
 

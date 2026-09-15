@@ -1,4 +1,31 @@
-# Release validation: 0.2.1
+# Release validation: 0.3.0
+
+Recorded on 2026-09-15. Local validation and all 47 regression cases passed on Windows Node 22.16.0; both Claude package contracts passed. This extends the 0.2.1 compatibility checks below.
+
+- Tracker regressions cover invalid priorities and report windows, protected IDs
+  and timestamps, multiline metadata and migration of legacy plain/quoted text.
+- Upgrade regressions exercise both adapters, receipts, local conflicts, intentional deletions, unknown
+  baselines, dry-run behavior and LF/CRLF changes. Bash and PowerShell wrappers
+  accept the upgrade option.
+- The [runnable example](../examples/label-normalizer/README.md) records a feature
+  implemented by a Codex desktop agent using the kit's instructions inline:
+  three behavioral failures against the starter, then four passing tests and
+  successful syntax verification without modifying the tests.
+- CI runs both adapter replays on Windows/Ubuntu and Node 22/24. The replay contains
+  the solution and invokes no model. It does not claim fresh Claude client behavior
+  or an autonomous Codex client run.
+- The `required-checks` CI job succeeds only when the entire validation matrix and
+  Claude plugin contract job succeed. This is the status check used for main's
+  branch protection.
+
+The tracker now writes a `# sdlc-tracker-format: json-strings-v1` comment inside
+frontmatter and JSON-quotes string values. Existing unmarked metadata retains its
+literal values; saving an old item migrates that item. Tools should use `list --json`
+instead of parsing the human-readable `show` output. Concurrent tracker writers
+are not coordinated; use one writer per project.
+
+## Historical release validation: 0.2.1
+
 
 Recorded on 2026-09-14. These are compatibility checks and local reproductions, not evidence that every workflow succeeds on every client.
 

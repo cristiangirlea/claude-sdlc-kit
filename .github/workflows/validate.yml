@@ -51,3 +51,16 @@ jobs:
         run: |
           npx --yes --package @anthropic-ai/claude-code@2.1.270 claude plugin validate adapters/claude/sdlc
           npx --yes --package @anthropic-ai/claude-code@2.1.270 claude plugin validate adapters/claude/tracker
+
+  required-checks:
+    if: always()
+    needs: [validate, claude-plugin-contract]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every validation job to succeed
+        env:
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+          CLAUDE_RESULT: ${{ needs.claude-plugin-contract.result }}
+        run: |
+          test "$VALIDATE_RESULT" = success
+          test "$CLAUDE_RESULT" = success
