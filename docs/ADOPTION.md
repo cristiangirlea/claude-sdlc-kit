@@ -45,6 +45,49 @@ Existing files are skipped unless you pass `--force` / `-Force`; `--dry-run` / `
 
 **Use this when** the team wants to read and edit the prompts in the repo they belong to, or when you want the workflow pinned per project. The cost is drift: each repo's copy ages separately.
 
+## Upgrading vendored installations
+
+Installations record normalized text hashes and the installed version of each file
+in `.sdlc/install-claude.json` or `.sdlc/install-codex.json`. Commit this receipt
+alongside the installed files. It contains no credentials or absolute paths.
+
+After obtaining the newer kit version, preview and apply with the same tool and
+`--templates` selection used for the original installation:
+
+```bash
+./scripts/install.sh /path/to/repo --tool codex --templates --upgrade --dry-run
+./scripts/install.sh /path/to/repo --tool codex --templates --upgrade
+```
+
+```powershell
+.\scripts\install.ps1 -Target C:\src\my-repo -Tool claude -Templates -Upgrade -DryRun
+.\scripts\install.ps1 -Target C:\src\my-repo -Tool claude -Templates -Upgrade
+```
+
+- Untouched files are updated when the kit changes them. LF/CRLF conversion alone
+  does not count as a local edit.
+- Local edits are preserved. If both your copy and the kit changed from the recorded
+  baseline, the installer prints `conflict` and returns **2**. Other safe updates
+  are still applied; a conflict does not roll them back. `--dry-run` writes nothing,
+  including the receipt, and also returns 2 when it predicts conflicts.
+- To resolve a conflict, compare your file with the corresponding new adapter or
+  template. Merge the changes manually. A customized file keeps its old baseline
+  and will continue to be reported when the kit differs; this is intentional.
+  Alternatively, back up your customizations and restore that file from the
+  original installation commit, then retry `--upgrade` to accept the kit version.
+- Files from installations predating receipts have no known baseline. Matching
+  files can be adopted; differing files are preserved and reported as conflicts.
+  Do not invent receipt hashes to mark a customized file as untouched.
+- `--force` replaces **all selected files**, including customizations; it is not a
+  per-file conflict resolver. It cannot be combined with `--upgrade`.
+- The receipt's `lastRunVersion` identifies the kit used for the last invocation.
+  Each file's `version` identifies its recorded baseline; unresolved files can
+  remain on an older baseline. Removed upstream files are not automatically deleted.
+
+Exit codes: 0 = completed without upgrade conflicts, 1 = invalid arguments,
+receipt or filesystem failure, 2 = upgrade conflicts preserved. The default
+installation mode still preserves existing files instead of automatically upgrading.
+
 ## Either way: onboard the repo
 
 ```

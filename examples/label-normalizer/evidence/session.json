@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-09-15T07:00:53.187290+00:00",
+  "driver": "Codex desktop agent, inline workflow roles",
+  "node": "v22.16.0",
+  "platform": "Windows",
+  "testSha256": "41df61cd495314b94027a4d52c6d5dbebc8a58e011a9645f5e1b077ce53f4ec2",
+  "red": {
+    "command": [
+      "node",
+      "--test",
+      "label-normalizer.test.mjs"
+    ],
+    "exitCode": 1,
+    "passed": 1,
+    "failed": 3
+  },
+  "greenCommands": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "label-normalizer.test.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "label-normalizer.mjs"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "testsChangedBetweenRedAndGreen": false,
+  "scope": "One authorized example feature; no independent reviewer or autonomous client run claimed"
+}

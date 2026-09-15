@@ -2,7 +2,8 @@
 // Local file-backed issue tracker.
 //
 // One markdown file per work item under `docs/tracker/`, with simple
-// `key: value` frontmatter. Plain files on purpose: they diff, they review,
+// JSON-quoted string frontmatter (legacy plain strings remain readable).
+// Plain files on purpose: they diff, they review,
 // they survive without a service, and they are readable by a human and an
 // agent alike.
 //
@@ -38,6 +39,7 @@ const STATUSES = [
   "done",
 ];
 const TYPES = ["feature", "bug", "chore", "spike"];
+const PRIORITIES = ["P1", "P2", "P3", "P4"];
 
 const cliArgs = process.argv.slice(2);
 const rootIndex = cliArgs.indexOf("--root");
@@ -90,10 +92,21 @@ function parseItem(path) {
   const raw = readFileSync(path, "utf8");
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return null;
-  const meta = {};
+  const quoted = m[1].split(/\r?\n/).includes("# sdlc-tracker-format: json-strings-v1");
+  const meta = Object.create(null);
   for (const line of m[1].split(/\r?\n/)) {
     const kv = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (kv) meta[kv[1]] = kv[2].trim();
+    if (kv) {
+      const value = kv[2].trim();
+      // The marker distinguishes new encoded strings from literal legacy quotes.
+      if (quoted) {
+        try {
+          const parsed = JSON.parse(value);
+          if (typeof parsed !== "string") fail(`invalid string in ${basename(path)}: ${kv[1]}`);
+          meta[kv[1]] = parsed;
+        } catch { fail(`invalid quoted string in ${basename(path)}: ${kv[1]}`); }
+      } else meta[kv[1]] = value;
+    }
   }
   return { path, meta, body: m[2] };
 }
@@ -118,8 +131,8 @@ function serialize(item) {
     ...keys.filter((k) => item.meta[k] !== undefined),
     ...Object.keys(item.meta).filter((k) => !seen.has(k)),
   ];
-  const fm = ordered.map((k) => `${k}: ${item.meta[k] ?? ""}`).join("\n");
-  return `---\n${fm}\n---\n${item.body.replace(/^\n*/, "\n")}`;
+  const fm = ordered.map((k) => `${k}: ${JSON.stringify(item.meta[k] ?? "")}`).join("\n");
+  return `---\n# sdlc-tracker-format: json-strings-v1\n${fm}\n---\n${item.body.replace(/^\n*/, "\n")}`;
 }
 
 function allItems() {
@@ -206,13 +219,14 @@ function cmdShow(args) {
 
 function cmdNew(args) {
   const title = args.find((a) => !a.startsWith("--"));
-  if (!title) fail('new needs a title: tracker.mjs new "Add saved searches"');
+  if (!title || !title.trim()) fail('new needs a title: tracker.mjs new "Add saved searches"');
 
   const type = flag(args, "type", "feature");
   if (!TYPES.includes(type)) fail(`type must be one of: ${TYPES.join(", ")}`);
   const status = flag(args, "status", "backlog");
   if (!STATUSES.includes(status)) fail(`status must be one of: ${STATUSES.join(", ")}`);
   const priority = flag(args, "priority", "P3");
+  if (!PRIORITIES.includes(priority)) fail(`priority must be one of: ${PRIORITIES.join(", ")}`);
 
   mkdirSync(DIR, { recursive: true });
   const id = nextId();
@@ -278,7 +292,12 @@ function cmdSet(args) {
     if (eq < 1) fail(`bad key=value: ${pair}`);
     const key = pair.slice(0, eq);
     const value = pair.slice(eq + 1);
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(key) || ["constructor", "prototype"].includes(key)) fail(`invalid metadata key: ${key}`);
+    if (["id", "created", "updated"].includes(key)) fail(`${key} is managed by the tracker and cannot be changed`);
     if (key === "status") fail("use `move` to change status so the log stays accurate");
+    if (key === "priority" && !PRIORITIES.includes(value)) fail(`priority must be one of: ${PRIORITIES.join(", ")}`);
+    if (key === "type" && !TYPES.includes(value)) fail(`type must be one of: ${TYPES.join(", ")}`);
+    if (key === "title" && !value.trim()) fail("title must not be empty");
     changes.push(`${key}=${value}`);
     item.meta[key] = value;
   }
@@ -298,7 +317,9 @@ function cmdComment(args) {
 }
 
 function cmdReport(args) {
-  const days = Number(flag(args, "days", "7"));
+  const rawDays = flag(args, "days", "7");
+  const days = Number(rawDays);
+  if (!/^\d+$/.test(rawDays) || !Number.isSafeInteger(days) || days > 365000) fail("--days must be an integer between 0 and 365000");
   const cutoff = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
   const items = allItems();
   const by = (s) => items.filter((i) => i.meta.status === s);

@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -73,6 +73,8 @@ for (const tool of ["claude", "codex"]) {
       writeFileSync(memory, "existing project memory");
       ok([...entry, ...flags]);
       assert.equal(readFileSync(memory, "utf8"), "existing project memory");
+      ok([...entry, ...flags, wrapper === "powershell" ? "-Upgrade" : "--upgrade", wrapper === "powershell" ? "-DryRun" : "--dry-run"]);
+      assert.equal(readFileSync(memory, "utf8"), "existing project memory");
       ok([...entry, ...flags, wrapper === "powershell" ? "-Force" : "--force"]);
       assert.notEqual(readFileSync(memory, "utf8"), "existing project memory");
       if (tool === "claude") {
@@ -102,6 +104,108 @@ test("tracker keeps explicit project config and data outside plugin resources", 
   assert.ok(!existsSync(join(plugin, "docs/tracker")));
   for (const args of [["move", "PROJECT-1", "ready"], ["next"], ["set", "PROJECT-1", "branch=feat/PROJECT-1"], ["comment", "PROJECT-1", "Verified"], ["move", "PROJECT-1", "done"], ["report"], ["list", "--json"], ["--help"], ["-h"]]) ok([...cli, ...args], project);
   for (const args of [["--root"], ["unknown"], ["toString"], ["move", "PROJECT-1", "invalid"]]) assert.notEqual(run([...cli, ...args], project).status, 0);
+});
+
+test("tracker validates priority, report window and immutable metadata without changing items", t => {
+  const target = fixture(t);
+  const cli = node("src/scripts/tracker.mjs", "--root", target);
+  assert.notEqual(run([...cli, "new", "Invalid", "--priority", "banana"]).status, 0);
+  assert.ok(!existsSync(join(target, "docs/tracker")));
+  ok([...cli, "new", "Valid"]);
+  const path = join(target, "docs/tracker", readdirSync(join(target, "docs/tracker"))[0]);
+  const before = readFileSync(path, "utf8");
+  for (const pair of ["id=", "id=TASK-2", "created=yesterday", "updated=tomorrow", "priority=banana", "type=unknown", "bad key=value", "__proto__=value"]) {
+    assert.notEqual(run([...cli, "set", "TASK-1", pair]).status, 0, pair);
+    assert.equal(readFileSync(path, "utf8"), before);
+  }
+  for (const value of ["banana", "-1", "1.5", "Infinity", "999999999999999"]) {
+    const result = run([...cli, "report", "--days", value]);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /tracker:.*days/);
+    assert.doesNotMatch(result.stderr, /RangeError|at cmdReport/);
+  }
+  ok([...cli, "report", "--days", "0"]);
+});
+
+for (const tool of ["claude", "codex"]) {
+  test(`${tool} upgrade updates untouched files and preserves conflicts with their original baseline`, t => {
+    const kit = fixture(t), target = fixture(t);
+    for (const part of ["scripts", "src", "templates", "LICENSE"]) cpSync(join(root, part), join(kit, part), { recursive: true });
+    ok([process.execPath, "scripts/build.mjs"], kit);
+    const cli = [process.execPath, join(kit, "scripts/install.mjs"), target, "--tool", tool];
+    ok(cli);
+    const base = tool === "claude" ? ".claude" : ".agents";
+    const helper = `${base}/${tool === "claude" ? "plugins/tracker/" : ""}scripts/tracker.mjs`;
+    const skill = `${base}/skills/tracker-workflow/SKILL.md`;
+    const originalSkill = readFileSync(join(target, skill), "utf8");
+    const originalHelper = readFileSync(join(target, helper), "utf8").replace(/\r?\n/g, "\r\n");
+    writeFileSync(join(target, helper), originalHelper);
+    writeFileSync(join(target, skill), originalSkill + "\nLocal instructions\n");
+    const receiptPath = join(target, `.sdlc/install-${tool}.json`);
+    const receiptBefore = readFileSync(receiptPath, "utf8");
+    const manifest = JSON.parse(readFileSync(join(kit, "src/manifest.json"), "utf8"));
+    manifest.version = "9.0.0";
+    writeFileSync(join(kit, "src/manifest.json"), JSON.stringify(manifest));
+    for (const file of ["src/scripts/tracker.mjs", "src/skills/tracker-workflow/SKILL.md"]) {
+      writeFileSync(join(kit, file), readFileSync(join(kit, file), "utf8") + "\n// Upstream revision\n");
+    }
+    ok([process.execPath, "scripts/build.mjs"], kit);
+    const dry = run([...cli, "--upgrade", "--dry-run"]);
+    assert.equal(dry.status, 2, dry.stdout + dry.stderr);
+    assert.match(dry.stdout, /conflict/);
+    assert.equal(readFileSync(receiptPath, "utf8"), receiptBefore);
+    assert.equal(readFileSync(join(target, helper), "utf8"), originalHelper);
+    const upgraded = run([...cli, "--upgrade"]);
+    assert.equal(upgraded.status, 2, upgraded.stdout + upgraded.stderr);
+    assert.match(readFileSync(join(target, helper), "utf8"), /Upstream revision/);
+    assert.equal(readFileSync(join(target, skill), "utf8"), originalSkill + "\nLocal instructions\n");
+    const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
+    assert.equal(receipt.files[helper].version, "9.0.0");
+    assert.equal(receipt.files[skill].version, JSON.parse(receiptBefore).files[skill].version);
+    // Restoring the original file makes it safe to upgrade on the next attempt.
+    writeFileSync(join(target, skill), originalSkill);
+    ok([...cli, "--upgrade"]);
+    assert.match(readFileSync(join(target, skill), "utf8"), /Upstream revision/);
+    assert.equal(JSON.parse(readFileSync(receiptPath, "utf8")).files[skill].version, "9.0.0");
+  });
+}
+
+test("upgrade preserves files without a recorded baseline and rejects damaged receipts before writing", t => {
+  const target = fixture(t);
+  mkdirSync(join(target, ".agents/skills/tracker-workflow"), { recursive: true });
+  const path = join(target, ".agents/skills/tracker-workflow/SKILL.md");
+  writeFileSync(path, "Existing custom instructions");
+  const cli = node("scripts/install.mjs", target, "--tool", "codex", "--upgrade");
+  assert.equal(run(cli).status, 2);
+  assert.equal(readFileSync(path, "utf8"), "Existing custom instructions");
+  const receipt = join(target, ".sdlc/install-codex.json");
+  assert.ok(!Object.hasOwn(JSON.parse(readFileSync(receipt, "utf8")).files, ".agents/skills/tracker-workflow/SKILL.md"));
+  writeFileSync(receipt, "not JSON");
+  const result = run(cli);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /receipt/);
+  assert.equal(readFileSync(path, "utf8"), "Existing custom instructions");
+});
+
+test("tracker round-trips multiline and quoted metadata and reads legacy items", t => {
+  const target = fixture(t), cli = node("src/scripts/tracker.mjs", "--root", target);
+  const title = 'Search: "saved"\nstatus: done\n---\nmore';
+  ok([...cli, "new", title]);
+  let item = JSON.parse(ok([...cli, "list", "--json"]))[0];
+  assert.equal(item.title, title);
+  assert.equal(item.status, "backlog");
+  const note = 'line one\nstatus: done\n"quoted"';
+  ok([...cli, "set", "TASK-1", `context=${note}`, "priority=P1"]);
+  item = JSON.parse(ok([...cli, "list", "--json"]))[0];
+  assert.equal(item.context, note);
+  assert.equal(item.status, "backlog");
+  writeFileSync(join(target, "docs/tracker/TASK-2-legacy.md"), "---\nid: TASK-2\ntitle: Legacy: title\nstatus: ready\npriority: P2\n---\n\n## Notes\nKeep this body.\n");
+  ok([...cli, "move", "TASK-2", "done"]);
+  assert.match(ok([...cli, "show", "TASK-2"]), /Keep this body/);
+  assert.equal(JSON.parse(ok([...cli, "list", "--json"]))[1].title, "Legacy: title");
+  writeFileSync(join(target, "docs/tracker/TASK-3-quoted.md"), '---\nid: TASK-3\ntitle: "quoted": legacy title\nstatus: ready\n---\nBody\n');
+  ok([...cli, "move", "TASK-3", "done"]);
+  assert.equal(JSON.parse(ok([...cli, "list", "--json"]))[2].title, '"quoted": legacy title');
 });
 
 for (const [name, content, removed, expected] of [
@@ -160,3 +264,28 @@ for (const [path, deny] of [[".env", true], [".env.production.local", true], [".
     assert.equal(output ? JSON.parse(output).hookSpecificOutput.permissionDecision === "deny" : false, deny);
   });
 }
+
+for (const tool of ["claude", "codex"]) {
+  test(`recorded workflow replays through installed ${tool} adapter`, () => {
+    assert.match(ok(node("scripts/demo-workflow.mjs", "--tool", tool)), /Tracker lifecycle PASS/);
+  });
+}
+
+test("installer rejects a receipt junction before writing into either project", t => {
+  const target = fixture(t), elsewhere = fixture(t);
+  symlinkSync(elsewhere, join(target, ".sdlc"), process.platform === "win32" ? "junction" : "dir");
+  const result = run(node("scripts/install.mjs", target, "--tool", "codex", "--upgrade"));
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /symlink|junction/);
+  assert.ok(!existsSync(join(target, ".agents")));
+  assert.deepEqual(readdirSync(elsewhere), []);
+});
+
+test("installer rejects conflicting flags and receipt directories before writing files", t => {
+  const target = fixture(t), cli = node("scripts/install.mjs", target, "--tool", "codex");
+  assert.equal(run([...cli, "--force", "--upgrade"]).status, 1);
+  assert.deepEqual(readdirSync(target), []);
+  mkdirSync(join(target, ".sdlc/install-codex.json"), { recursive: true });
+  assert.equal(run([...cli, "--upgrade"]).status, 1);
+  assert.ok(!existsSync(join(target, ".agents")));
+});
